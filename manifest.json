@@ -8,5 +8,9 @@
     "permissions": [
         "bookmarks",
         "tabs"
-    ]
+    ],
+
+    "background": {
+        "scripts": ["background.js"]
+    }
 }
