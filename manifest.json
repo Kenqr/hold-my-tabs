@@ -1,0 +1,12 @@
+{
+    "manifest_version": 2,
+    "name": "Hold My Tabs",
+    "version": "0.1",
+
+    "description": "Move tabs into and out of a bookmark folder.",
+
+    "permissions": [
+        "bookmarks",
+        "tabs"
+    ]
+}
