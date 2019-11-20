@@ -64,7 +64,7 @@ function createBookmarkTree(node) {
     } else { // Folder
       const anchor = document.createElement('a');
       anchor.href = '#'+child.id;
-      anchor.textContent = child.title;
+      anchor.textContent = '📁'+child.title;
       li.appendChild(anchor);
     }
     ul.appendChild(li);
