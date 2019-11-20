@@ -4,9 +4,21 @@
     "version": "0.1",
 
     "description": "Move tabs into and out of a bookmark folder.",
+    "icons": {
+        "128": "icons/logo-128.png"
+    },
 
     "permissions": [
         "bookmarks",
         "tabs"
-    ]
+    ],
+
+    "background": {
+        "scripts": ["background.js"]
+    },
+
+    "browser_action": {
+        "default_icon": "icons/logo-128.png",
+        "default_title": "Hold My Tabs"
+    }
 }

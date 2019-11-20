@@ -1,0 +1,23 @@
+* {
+    box-sizing: border-box;
+}
+
+html, body {
+    height: 100%;
+    margin: 0;
+}
+
+#main {
+    height: 100%;
+    display: flex;
+    background: hsl(0, 0%, 95%);
+    font-size: 1.5em;
+}
+
+.partition {
+    margin: 5px;
+    padding: 5px;
+    flex: 1 0 0;
+    overflow-y: auto;
+    background: white;
+}
