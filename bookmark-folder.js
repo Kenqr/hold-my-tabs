@@ -14,19 +14,32 @@ async function renderFolderTree() {
 function createFolderTree(node) {
   const ul = document.createElement('ul');
   for (child of node.children) {
-    if (child.url) continue; // Skip bookmarks
+    if (getBtnType(child) === 'bookmark') continue; // Skip bookmarks
 
     // Create list item
     const li = document.createElement('li');
-    const anchor = document.createElement('a');
-    anchor.href = '#'+child.id;
-    anchor.textContent = child.title;
-    li.appendChild(anchor);
+    switch (getBtnType(child)) {
+      case 'separator': {
+        const span = document.createElement('span');
+        span.textContent = '--------------------------------';
+        li.appendChild(span);
+        break;
+      }
+      case 'folder': {
+        const anchor = document.createElement('a');
+        anchor.href = '#'+child.id;
+        anchor.textContent = '📁'+child.title;
+        li.appendChild(anchor);
+        break;
+      }
+    }
     ul.appendChild(li);
 
     // Create child list
-    const subTree = createFolderTree(child);
-    if (subTree.hasChildNodes()) li.appendChild(subTree);
+    if (getBtnType(child) === 'folder') {
+      const subTree = createFolderTree(child);
+      if (subTree.hasChildNodes()) li.appendChild(subTree);
+    }
   }
   return ul;
 }
