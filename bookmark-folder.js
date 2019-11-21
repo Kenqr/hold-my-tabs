@@ -7,41 +7,8 @@ const init = async function() {
 
 async function renderFolderTree() {
   const rootNode = (await browser.bookmarks.getTree())[0];
-  const rootFolderTree = createFolderTree(rootNode);
+  const rootFolderTree = createBookmarkTree(rootNode, false);
   document.querySelector('#folderTree').appendChild(rootFolderTree);
-}
-
-function createFolderTree(node) {
-  const ul = document.createElement('ul');
-  for (child of node.children) {
-    if (getBtnType(child) === 'bookmark') continue; // Skip bookmarks
-
-    // Create list item
-    const li = document.createElement('li');
-    switch (getBtnType(child)) {
-      case 'separator': {
-        const span = document.createElement('span');
-        span.textContent = '--------------------------------';
-        li.appendChild(span);
-        break;
-      }
-      case 'folder': {
-        const anchor = document.createElement('a');
-        anchor.href = '#'+child.id;
-        anchor.textContent = '📁'+child.title;
-        li.appendChild(anchor);
-        break;
-      }
-    }
-    ul.appendChild(li);
-
-    // Create child list
-    if (getBtnType(child) === 'folder') {
-      const subTree = createFolderTree(child);
-      if (subTree.hasChildNodes()) li.appendChild(subTree);
-    }
-  }
-  return ul;
 }
 
 async function renderBookmarkTree() {
@@ -59,9 +26,12 @@ async function renderBookmarkTree() {
   }
 }
 
-function createBookmarkTree(node) {
+function createBookmarkTree(node, showBookmarks=true) {
   const ul = document.createElement('ul');
   for (child of node.children) {
+    // Skip bookmarks if showBookmarks==false
+    if (!showBookmarks && getBtnType(child) === 'bookmark') continue;
+
     // Create list item
     const li = document.createElement('li');
     switch (getBtnType(child)) {
@@ -91,7 +61,7 @@ function createBookmarkTree(node) {
 
     // Create child list
     if (getBtnType(child) === 'folder') {
-      const subTree = createBookmarkTree(child);
+      const subTree = createBookmarkTree(child, showBookmarks);
       if (subTree.hasChildNodes()) li.appendChild(subTree);
     }
   }
