@@ -51,31 +51,53 @@ function createBookmarkTree(node) {
   for (child of node.children) {
     // Create list item
     const li = document.createElement('li');
-    if (child.type == 'separator' || child.url=='data:') { // Separator
-      const span = document.createElement('span');
-      span.textContent = '--------------------------------';
-      li.appendChild(span);
-    } else if (child.url) { // Bookmark
-      const anchor = document.createElement('a');
-      anchor.href = child.url;
-      anchor.target = '_blank';
-      anchor.textContent = child.title;
-      li.appendChild(anchor);
-    } else { // Folder
-      const anchor = document.createElement('a');
-      anchor.href = '#'+child.id;
-      anchor.textContent = '📁'+child.title;
-      li.appendChild(anchor);
+    switch (getBtnType(child)) {
+      case 'separator': {
+        const span = document.createElement('span');
+        span.textContent = '--------------------------------';
+        li.appendChild(span);
+        break;
+      }
+      case 'bookmark': {
+        const anchor = document.createElement('a');
+        anchor.href = child.url;
+        anchor.target = '_blank';
+        anchor.textContent = child.title;
+        li.appendChild(anchor);
+        break;
+      }
+      case 'folder': {
+        const anchor = document.createElement('a');
+        anchor.href = '#'+child.id;
+        anchor.textContent = '📁'+child.title;
+        li.appendChild(anchor);
+        break;
+      }
     }
     ul.appendChild(li);
 
     // Create child list
-    if (!child.url) {
+    if (getBtnType(child) === 'folder') {
       const subTree = createBookmarkTree(child);
       if (subTree.hasChildNodes()) li.appendChild(subTree);
     }
   }
   return ul;
+}
+
+/**
+ * Get the type of the bookmark tree node.
+ * 
+ * @param {bookmarks.BookmarkTreeNode} node - The bookmark tree node.
+ * @returns {string} The type of the bookmark tree node,
+ *    which is one of the following three values: 'bookmark'|'folder'|'separator'
+ */
+function getBtnType(node) {
+  if (node.type) {
+    return node.type;
+  } else {
+    return node.url ? 'bookmark' : 'folder';
+  }
 }
 
 init();
