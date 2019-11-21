@@ -45,7 +45,16 @@ function createBookmarkTree(node, showBookmarks=true) {
         const anchor = document.createElement('a');
         anchor.href = child.url;
         anchor.target = '_blank';
-        anchor.textContent = child.title;
+
+        const favicon = document.createElement('img');
+        favicon.src = getFavicon(child.url);
+        favicon.width = 16;
+
+        const title = document.createElement('span');
+        title.textContent = child.title;
+
+        anchor.appendChild(favicon);
+        anchor.appendChild(title);
         li.appendChild(anchor);
         break;
       }
@@ -66,6 +75,13 @@ function createBookmarkTree(node, showBookmarks=true) {
     }
   }
   return ul;
+}
+
+function getFavicon(url) {
+  // Use domain name to get favicon from Google S2
+  const anchor = document.createElement('a');
+  anchor.href = url;
+  return 'http://www.google.com/s2/favicons?domain=' + anchor.hostname;
 }
 
 /**
