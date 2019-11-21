@@ -5,7 +5,13 @@
 <link href="bookmark-folder.css" rel="stylesheet">
 
 <div id="main">
-  <div class="partition" id="folderTree"></div>
+  <div class="partition hidden" id="folderTreeDiv">
+    <div id="folderTree"></div>
+  </div>
+  <button id="folderTreeDivToggle">
+    Show/Hide bookmark folder tree
+  </button>
+
   <div class="partition" id="bookmarkTreeDiv">
     <h1 id="folderTitle"></h1>
     <div id="bookmarkTree"></div>

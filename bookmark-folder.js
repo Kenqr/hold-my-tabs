@@ -2,7 +2,17 @@ const init = async function() {
   renderFolderTree();
 
   renderBookmarkTree();
-  window.addEventListener('hashchange', renderBookmarkTree)
+  window.addEventListener('hashchange', renderBookmarkTree);
+
+  // Click #folderTreeDivToggle to toggle #folderTreeDiv
+  document.querySelector('#folderTreeDivToggle').addEventListener('click', () => {
+    document.querySelector('#folderTreeDiv').classList.toggle('hidden');
+  });
+
+  // Show folder tree if no folder is selected
+  if (location.hash==='') {
+    document.querySelector('#folderTreeDiv').classList.remove('hidden');
+  }
 };
 
 async function renderFolderTree() {
