@@ -4,8 +4,8 @@ const init = async function() {
   renderBookmarkTree();
   window.addEventListener('hashchange', renderBookmarkTree);
 
-  // Click #folderTreeDivToggle to toggle #folderTreeDiv
-  document.querySelector('#folderTreeDivToggle').addEventListener('click', () => {
+  // Click .folder-tree-toggle to toggle #folderTreeDiv
+  document.querySelector('.folder-tree-toggle').addEventListener('click', () => {
     document.querySelector('#folderTreeDiv').classList.toggle('hidden');
   });
 
