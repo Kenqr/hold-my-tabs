@@ -42,8 +42,12 @@ html, body {
 .bmtn {
     display: block;
 }
+.bmtn:focus,
 .bmtn:hover {
     background-color: hsl(240, 100%, 50%, 0.1);
+}
+.bmtn:focus {
+    outline: 0;
 }
 
 .bmtn_separator:hover {
