@@ -57,6 +57,9 @@ html, body {
 .bmtn_bookmark {
     color: hsl(120, 100%, 25%);
 }
+.bmtn_separator {
+    line-height: 0.6em;
+}
 .bmtn_separator:hover {
     background-color: transparent;
 }
