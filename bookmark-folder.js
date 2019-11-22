@@ -46,13 +46,15 @@ function createBookmarkTree(node, showBookmarks=true) {
     const li = document.createElement('li');
     switch (getBtnType(child)) {
       case 'separator': {
-        const span = document.createElement('span');
-        span.textContent = '--------------------------------';
-        li.appendChild(span);
+        const div = document.createElement('div');
+        div.classList.add('bmtn', 'bmtn_separator');
+        div.textContent = '--------------------------------';
+        li.appendChild(div);
         break;
       }
       case 'bookmark': {
         const anchor = document.createElement('a');
+        anchor.classList.add('bmtn');
         anchor.href = child.url;
         anchor.target = '_blank';
 
@@ -70,6 +72,7 @@ function createBookmarkTree(node, showBookmarks=true) {
       }
       case 'folder': {
         const anchor = document.createElement('a');
+        anchor.classList.add('bmtn');
         anchor.href = '#'+child.id;
         anchor.textContent = '📁'+child.title;
         li.appendChild(anchor);
