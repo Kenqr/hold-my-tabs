@@ -38,6 +38,7 @@ async function renderBookmarkTree() {
 
 function createBookmarkTree(node, showBookmarks=true) {
   const ul = document.createElement('ul');
+  ul.classList.add('bookmark-folder-content');
   for (child of node.children) {
     // Skip bookmarks if showBookmarks==false
     if (!showBookmarks && getBtnType(child) === 'bookmark') continue;

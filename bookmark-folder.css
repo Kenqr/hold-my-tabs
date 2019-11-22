@@ -34,6 +34,10 @@ html, body {
     padding: 5px;
 }
 
+.bookmark-folder-content {
+    list-style: none;
+}
+
 /* Bookmark Tree Node */
 .bmtn {
     display: block;
