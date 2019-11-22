@@ -41,6 +41,7 @@ html, body {
 /* Bookmark Tree Node */
 .bmtn {
     display: block;
+    text-decoration: none;
 }
 .bmtn:focus,
 .bmtn:hover {
