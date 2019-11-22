@@ -51,6 +51,12 @@ html, body {
     outline: 0;
 }
 
+.bmtn_folder {
+    color: hsl(230, 100%, 50%);
+}
+.bmtn_bookmark {
+    color: hsl(120, 100%, 25%);
+}
 .bmtn_separator:hover {
     background-color: transparent;
 }

@@ -55,7 +55,7 @@ function createBookmarkTree(node, showBookmarks=true) {
       }
       case 'bookmark': {
         const anchor = document.createElement('a');
-        anchor.classList.add('bmtn');
+        anchor.classList.add('bmtn', 'bmtn_bookmark');
         anchor.href = child.url;
         anchor.target = '_blank';
 
@@ -73,7 +73,7 @@ function createBookmarkTree(node, showBookmarks=true) {
       }
       case 'folder': {
         const anchor = document.createElement('a');
-        anchor.classList.add('bmtn');
+        anchor.classList.add('bmtn', 'bmtn_folder');
         anchor.href = '#'+child.id;
         anchor.textContent = '📁'+child.title;
         li.appendChild(anchor);
