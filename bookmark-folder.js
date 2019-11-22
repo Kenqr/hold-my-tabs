@@ -2,33 +2,23 @@ const init = async function() {
   renderFolderTree();
 
   renderBookmarkTree();
-  window.addEventListener('hashchange', renderBookmarkTree)
+  window.addEventListener('hashchange', renderBookmarkTree);
+
+  // Click .folder-tree-toggle to toggle #folderTreeDiv
+  document.querySelector('.folder-tree-toggle').addEventListener('click', () => {
+    document.querySelector('#folderTreeDiv').classList.toggle('hidden');
+  });
+
+  // Show folder tree if no folder is selected
+  if (location.hash==='') {
+    document.querySelector('#folderTreeDiv').classList.remove('hidden');
+  }
 };
 
 async function renderFolderTree() {
   const rootNode = (await browser.bookmarks.getTree())[0];
-  const rootFolderTree = createFolderTree(rootNode);
+  const rootFolderTree = createBookmarkTree(rootNode, false);
   document.querySelector('#folderTree').appendChild(rootFolderTree);
-}
-
-function createFolderTree(node) {
-  const ul = document.createElement('ul');
-  for (child of node.children) {
-    if (child.url) continue; // Skip bookmarks
-
-    // Create list item
-    const li = document.createElement('li');
-    const anchor = document.createElement('a');
-    anchor.href = '#'+child.id;
-    anchor.textContent = child.title;
-    li.appendChild(anchor);
-    ul.appendChild(li);
-
-    // Create child list
-    const subTree = createFolderTree(child);
-    if (subTree.hasChildNodes()) li.appendChild(subTree);
-  }
-  return ul;
 }
 
 async function renderBookmarkTree() {
@@ -46,36 +36,81 @@ async function renderBookmarkTree() {
   }
 }
 
-function createBookmarkTree(node) {
+function createBookmarkTree(node, showBookmarks=true) {
   const ul = document.createElement('ul');
+  ul.classList.add('bookmark-folder-content');
   for (child of node.children) {
+    // Skip bookmarks if showBookmarks==false
+    if (!showBookmarks && getBtnType(child) === 'bookmark') continue;
+
     // Create list item
     const li = document.createElement('li');
-    if (child.type == 'separator' || child.url=='data:') { // Separator
-      const span = document.createElement('span');
-      span.textContent = '--------------------------------';
-      li.appendChild(span);
-    } else if (child.url) { // Bookmark
-      const anchor = document.createElement('a');
-      anchor.href = child.url;
-      anchor.target = '_blank';
-      anchor.textContent = child.title;
-      li.appendChild(anchor);
-    } else { // Folder
-      const anchor = document.createElement('a');
-      anchor.href = '#'+child.id;
-      anchor.textContent = '📁'+child.title;
-      li.appendChild(anchor);
+    switch (getBtnType(child)) {
+      case 'separator': {
+        const div = document.createElement('div');
+        div.classList.add('bmtn', 'bmtn_separator');
+        div.textContent = '--------------------------------';
+        li.appendChild(div);
+        break;
+      }
+      case 'bookmark': {
+        const anchor = document.createElement('a');
+        anchor.classList.add('bmtn', 'bmtn_bookmark');
+        anchor.href = child.url;
+        anchor.target = '_blank';
+
+        const favicon = document.createElement('img');
+        favicon.src = getFavicon(child.url);
+        favicon.width = 16;
+
+        const title = document.createElement('span');
+        title.textContent = child.title;
+
+        anchor.appendChild(favicon);
+        anchor.appendChild(title);
+        li.appendChild(anchor);
+        break;
+      }
+      case 'folder': {
+        const anchor = document.createElement('a');
+        anchor.classList.add('bmtn', 'bmtn_folder');
+        anchor.href = '#'+child.id;
+        anchor.textContent = '📁'+child.title;
+        li.appendChild(anchor);
+        break;
+      }
     }
     ul.appendChild(li);
 
     // Create child list
-    if (!child.url) {
-      const subTree = createBookmarkTree(child);
+    if (getBtnType(child) === 'folder') {
+      const subTree = createBookmarkTree(child, showBookmarks);
       if (subTree.hasChildNodes()) li.appendChild(subTree);
     }
   }
   return ul;
+}
+
+function getFavicon(url) {
+  // Use domain name to get favicon from Google S2
+  const anchor = document.createElement('a');
+  anchor.href = url;
+  return 'http://www.google.com/s2/favicons?domain=' + anchor.hostname;
+}
+
+/**
+ * Get the type of the bookmark tree node.
+ * 
+ * @param {bookmarks.BookmarkTreeNode} node - The bookmark tree node.
+ * @returns {string} The type of the bookmark tree node,
+ *    which is one of the following three values: 'bookmark'|'folder'|'separator'
+ */
+function getBtnType(node) {
+  if (node.type) {
+    return node.type;
+  } else {
+    return node.url ? 'bookmark' : 'folder';
+  }
 }
 
 init();

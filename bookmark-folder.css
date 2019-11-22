@@ -7,17 +7,59 @@ html, body {
     margin: 0;
 }
 
-#main {
+.hidden {
+    display: none !important;
+}
+
+.main {
+    position: relative;
     height: 100%;
     display: flex;
     background: hsl(0, 0%, 95%);
     font-size: 1.5em;
 }
 
-.partition {
+.main__partition {
     margin: 5px;
     padding: 5px;
     flex: 1 0 0;
     overflow-y: auto;
     background: white;
+}
+
+.folder-tree-toggle {
+    position: absolute;
+    left: 10px;
+    bottom: 10px;
+    padding: 5px;
+}
+
+.bookmark-folder-content {
+    list-style: none;
+}
+
+/* Bookmark Tree Node */
+.bmtn {
+    display: block;
+    text-decoration: none;
+}
+.bmtn:focus,
+.bmtn:hover {
+    background-color: hsl(240, 100%, 50%, 0.1);
+}
+.bmtn:focus {
+    outline: 0;
+}
+
+.bmtn_folder {
+    color: hsl(230, 100%, 50%);
+}
+.bmtn_bookmark {
+    color: hsl(120, 100%, 25%);
+}
+.bmtn_separator {
+    line-height: 0.6em;
+}
+.bmtn_separator:hover {
+    background-color: transparent;
 }
