@@ -72,12 +72,19 @@ function createBookmarkTree(node, folderOnly=false) {
         deleteButton.addEventListener('click', deleteBookmarkButtonEventHandler);
         buttonSet.appendChild(deleteButton);
 
+        const renameButton = document.createElement('button');
+        renameButton.classList.add('bmtn__button');
+        renameButton.textContent = '✏';
+        renameButton.addEventListener('click', renameBookmarkButtonEventHandler);
+        buttonSet.appendChild(renameButton);
+
         const favicon = document.createElement('img');
         favicon.src = getFavicon(child.url);
         favicon.width = 16;
         anchor.appendChild(favicon);
 
         const title = document.createElement('span');
+        title.classList.add('bmtn__title')
         title.textContent = child.title;
         anchor.appendChild(title);
 
@@ -118,6 +125,26 @@ function deleteBookmarkButtonEventHandler(event) {
     // Delete list item and bookmark
     bmti.remove();
     browser.bookmarks.remove(bookmarkId);
+  }
+}
+
+async function renameBookmarkButtonEventHandler(event) {
+  event.preventDefault();
+
+  // Get list item and bookmark id
+  const bmti = event.target.closest('.bmti');
+  const bookmarkId = bmti.dataset.bookmarkId;
+  const bookmarkTreeNode = (await(browser.bookmarks.get(bookmarkId)))[0];
+
+  const newTitle = prompt('Rename bookmark to:', bookmarkTreeNode.title);
+  if (newTitle !== null) {
+    // Rename list item and bookmark
+    const bmtn = event.target.closest('.bmtn');
+    bmtn.querySelector('.bmtn__title').textContent = newTitle;
+    browser.bookmarks.update(
+      bookmarkId,
+      {title: newTitle}
+    );
   }
 }
 
