@@ -17,7 +17,7 @@ const init = async function() {
 
 async function renderFolderTree() {
   const rootNode = (await browser.bookmarks.getTree())[0];
-  const rootFolderTree = createBookmarkTree(rootNode, false);
+  const rootFolderTree = createBookmarkTree(rootNode, true);
   document.querySelector('#folderTree').appendChild(rootFolderTree);
 }
 
@@ -36,12 +36,12 @@ async function renderBookmarkTree() {
   }
 }
 
-function createBookmarkTree(node, showBookmarks=true) {
+function createBookmarkTree(node, folderOnly=false) {
   const ul = document.createElement('ul');
   ul.classList.add('bookmark-folder-content');
   for (child of node.children) {
-    // Skip bookmarks if showBookmarks==false
-    if (!showBookmarks && getBtnType(child) === 'bookmark') continue;
+    // Skip non-folders if folderOnly==true
+    if (folderOnly && getBtnType(child) !== 'folder') continue;
 
     // Create list item
     const li = document.createElement('li');
@@ -84,7 +84,7 @@ function createBookmarkTree(node, showBookmarks=true) {
 
     // Create child list
     if (getBtnType(child) === 'folder') {
-      const subTree = createBookmarkTree(child, showBookmarks);
+      const subTree = createBookmarkTree(child, folderOnly);
       if (subTree.hasChildNodes()) li.appendChild(subTree);
     }
   }
