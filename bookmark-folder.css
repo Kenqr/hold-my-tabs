@@ -40,6 +40,7 @@ html, body {
 
 /* Bookmark Tree Node */
 .bmtn {
+    position: relative;
     display: block;
     text-decoration: none;
 }
@@ -62,4 +63,21 @@ html, body {
 }
 .bmtn_separator:hover {
     background-color: transparent;
+}
+
+.bmtn__button-set {
+    display: inline-block;
+    height: 1em;
+    margin: 0 3px;
+    opacity: 0;
+}
+.bmtn:hover .bmtn__button-set {
+    opacity: 1;
+}
+
+.bmtn__button {
+    width: 2em;
+    height: 2em;
+    font-size: 0.5em;
+    padding: 0;
 }

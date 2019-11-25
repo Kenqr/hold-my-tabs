@@ -45,6 +45,8 @@ function createBookmarkTree(node, folderOnly=false) {
 
     // Create list item
     const li = document.createElement('li');
+    li.classList.add('bmti'); // Bookmark tree item
+    li.dataset.bookmarkId = child.id;
     switch (getBtnType(child)) {
       case 'separator': {
         const div = document.createElement('div');
@@ -58,17 +60,27 @@ function createBookmarkTree(node, folderOnly=false) {
         anchor.classList.add('bmtn', 'bmtn_bookmark');
         anchor.href = child.url;
         anchor.target = '_blank';
+        li.appendChild(anchor);
+
+        const buttonSet = document.createElement('div');
+        buttonSet.classList.add('bmtn__button-set');
+        anchor.appendChild(buttonSet);
+
+        const deleteButton = document.createElement('button');
+        deleteButton.classList.add('bmtn__button');
+        deleteButton.textContent = '🗑️';
+        deleteButton.addEventListener('click', deleteBookmarkButtonEventHandler);
+        buttonSet.appendChild(deleteButton);
 
         const favicon = document.createElement('img');
         favicon.src = getFavicon(child.url);
         favicon.width = 16;
+        anchor.appendChild(favicon);
 
         const title = document.createElement('span');
         title.textContent = child.title;
-
-        anchor.appendChild(favicon);
         anchor.appendChild(title);
-        li.appendChild(anchor);
+
         break;
       }
       case 'folder': {
@@ -89,6 +101,24 @@ function createBookmarkTree(node, folderOnly=false) {
     }
   }
   return ul;
+}
+
+function deleteBookmarkButtonEventHandler(event) {
+  event.preventDefault();
+
+  // Get list item and bookmark id
+  const bmti = event.target.closest('.bmti');
+  const bookmarkId = bmti.dataset.bookmarkId;
+
+  const msg = `
+    Do you want to delete this bookmark?
+    This action cannot be undone.
+  `;
+  if (confirm(msg)) {
+    // Delete list item and bookmark
+    bmti.remove();
+    browser.bookmarks.remove(bookmarkId);
+  }
 }
 
 function getFavicon(url) {
