@@ -56,15 +56,13 @@ function createBookmarkTree(node, folderOnly=false) {
         break;
       }
       case 'bookmark': {
-        const anchor = document.createElement('a');
-        anchor.classList.add('bmtn', 'bmtn_bookmark');
-        anchor.href = child.url;
-        anchor.target = '_blank';
-        li.appendChild(anchor);
+        const bmtn = document.createElement('div');
+        bmtn.classList.add('bmtn', 'bmtn_bookmark');
+        li.appendChild(bmtn);
 
         const buttonSet = document.createElement('div');
         buttonSet.classList.add('bmtn__button-set');
-        anchor.appendChild(buttonSet);
+        bmtn.appendChild(buttonSet);
 
         const deleteButton = document.createElement('button');
         deleteButton.classList.add('bmtn__button');
@@ -78,13 +76,22 @@ function createBookmarkTree(node, folderOnly=false) {
         renameButton.addEventListener('click', renameBookmarkButtonEventHandler);
         buttonSet.appendChild(renameButton);
 
+        const anchor = document.createElement('a');
+        anchor.classList.add('bmtn__body');
+        anchor.href = child.url;
+        anchor.target = '_blank';
+        bmtn.appendChild(anchor);
+
+        const icon = document.createElement('div');
+        icon.classList.add('bmtn__icon');
         const favicon = document.createElement('img');
         favicon.src = getFavicon(child.url);
         favicon.width = 16;
-        anchor.appendChild(favicon);
+        icon.appendChild(favicon);
+        anchor.appendChild(icon);
 
         const title = document.createElement('span');
-        title.classList.add('bmtn__title')
+        title.classList.add('bmtn__title');
         title.textContent = child.title;
         anchor.appendChild(title);
 
@@ -111,8 +118,6 @@ function createBookmarkTree(node, folderOnly=false) {
 }
 
 function deleteBookmarkButtonEventHandler(event) {
-  event.preventDefault();
-
   // Get list item and bookmark id
   const bmti = event.target.closest('.bmti');
   const bookmarkId = bmti.dataset.bookmarkId;
@@ -129,8 +134,6 @@ function deleteBookmarkButtonEventHandler(event) {
 }
 
 async function renameBookmarkButtonEventHandler(event) {
-  event.preventDefault();
-
   // Get list item and bookmark id
   const bmti = event.target.closest('.bmti');
   const bookmarkId = bmti.dataset.bookmarkId;
