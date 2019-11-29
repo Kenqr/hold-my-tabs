@@ -42,7 +42,6 @@ html, body {
 .bmtn {
     position: relative;
     display: flex;
-    text-decoration: none;
 }
 .bmtn:focus,
 .bmtn:hover {
@@ -52,9 +51,6 @@ html, body {
     outline: 0;
 }
 
-.bmtn_folder {
-    color: hsl(230, 100%, 50%);
-}
 .bmtn_separator {
     line-height: 0.6em;
 }
@@ -93,6 +89,10 @@ html, body {
 
 .bmtn_bookmark .bmtn__body {
     color: hsl(120, 100%, 25%);
+}
+
+.bmtn_folder .bmtn__body {
+    color: hsl(230, 100%, 50%);
 }
 
 .bmtn__icon {

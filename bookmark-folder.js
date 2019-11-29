@@ -47,22 +47,31 @@ function createBookmarkTree(node, folderOnly=false) {
     const li = document.createElement('li');
     li.classList.add('bmti'); // Bookmark tree item
     li.dataset.bookmarkId = child.id;
+
+    const bmtn = document.createElement('div');
+    li.appendChild(bmtn);
+
+    const buttonSet = document.createElement('div');
+    buttonSet.classList.add('bmtn__button-set');
+    bmtn.appendChild(buttonSet);
+
     switch (getBtnType(child)) {
       case 'separator': {
-        const div = document.createElement('div');
-        div.classList.add('bmtn', 'bmtn_separator');
-        div.textContent = '--------------------------------';
-        li.appendChild(div);
+        bmtn.classList.add('bmtn', 'bmtn_separator');
+
+        const bmtnBody = document.createElement('div');
+        bmtnBody.classList.add('bmtn__body');
+        bmtn.appendChild(bmtnBody);
+
+        const title = document.createElement('span');
+        title.classList.add('bmtn__title');
+        title.textContent = '--------------------------------';
+        bmtnBody.appendChild(title);
+
         break;
       }
       case 'bookmark': {
-        const bmtn = document.createElement('div');
         bmtn.classList.add('bmtn', 'bmtn_bookmark');
-        li.appendChild(bmtn);
-
-        const buttonSet = document.createElement('div');
-        buttonSet.classList.add('bmtn__button-set');
-        bmtn.appendChild(buttonSet);
 
         const deleteButton = document.createElement('button');
         deleteButton.classList.add('bmtn__button');
@@ -76,11 +85,11 @@ function createBookmarkTree(node, folderOnly=false) {
         renameButton.addEventListener('click', renameBookmarkButtonEventHandler);
         buttonSet.appendChild(renameButton);
 
-        const anchor = document.createElement('a');
-        anchor.classList.add('bmtn__body');
-        anchor.href = child.url;
-        anchor.target = '_blank';
-        bmtn.appendChild(anchor);
+        const bmtnBody = document.createElement('a');
+        bmtnBody.classList.add('bmtn__body');
+        bmtnBody.href = child.url;
+        bmtnBody.target = '_blank';
+        bmtn.appendChild(bmtnBody);
 
         const icon = document.createElement('div');
         icon.classList.add('bmtn__icon');
@@ -88,21 +97,33 @@ function createBookmarkTree(node, folderOnly=false) {
         favicon.src = getFavicon(child.url);
         favicon.width = 16;
         icon.appendChild(favicon);
-        anchor.appendChild(icon);
+        bmtnBody.appendChild(icon);
 
         const title = document.createElement('span');
         title.classList.add('bmtn__title');
         title.textContent = child.title;
-        anchor.appendChild(title);
+        bmtnBody.appendChild(title);
 
         break;
       }
       case 'folder': {
-        const anchor = document.createElement('a');
-        anchor.classList.add('bmtn', 'bmtn_folder');
-        anchor.href = '#'+child.id;
-        anchor.textContent = '📁'+child.title;
-        li.appendChild(anchor);
+        bmtn.classList.add('bmtn', 'bmtn_folder');
+
+        const bmtnBody = document.createElement('a');
+        bmtnBody.classList.add('bmtn__body');
+        bmtnBody.href = '#'+child.id;
+        bmtn.appendChild(bmtnBody);
+
+        const icon = document.createElement('div');
+        icon.classList.add('bmtn__icon');
+        icon.textContent = '📁';
+        bmtnBody.appendChild(icon);
+
+        const title = document.createElement('span');
+        title.classList.add('bmtn__title');
+        title.textContent = child.title;
+        bmtnBody.appendChild(title);
+
         break;
       }
     }
