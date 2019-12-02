@@ -41,7 +41,7 @@ function createBookmarkTree(node, folderOnly=false) {
   ul.classList.add('bookmark-folder-content');
   for (child of node.children) {
     // Skip non-folders if folderOnly==true
-    if (folderOnly && getBtnType(child) !== 'folder') continue;
+    if (folderOnly && getBmtnType(child) !== 'folder') continue;
 
     // Create list item
     const li = document.createElement('li');
@@ -55,7 +55,7 @@ function createBookmarkTree(node, folderOnly=false) {
     buttonSet.classList.add('bmtn__button-set');
     bmtn.appendChild(buttonSet);
 
-    switch (getBtnType(child)) {
+    switch (getBmtnType(child)) {
       case 'separator': {
         bmtn.classList.add('bmtn', 'bmtn_separator');
 
@@ -142,7 +142,7 @@ function createBookmarkTree(node, folderOnly=false) {
     ul.appendChild(li);
 
     // Create child list
-    if (getBtnType(child) === 'folder') {
+    if (getBmtnType(child) === 'folder') {
       const subTree = createBookmarkTree(child, folderOnly);
       if (subTree.hasChildNodes()) li.appendChild(subTree);
     }
@@ -155,7 +155,7 @@ async function deleteBookmarkButtonEventHandler(event) {
   const bmti = event.target.closest('.bmti');
   const bookmarkId = bmti.dataset.bookmarkId;
   const node = (await browser.bookmarks.get(bookmarkId))[0];
-  const nodeType = getBtnType(node);
+  const nodeType = getBmtnType(node);
 
   // Confirm deletion
   const msg = `
@@ -206,7 +206,7 @@ function getFavicon(url) {
  * @returns {string} The type of the bookmark tree node,
  *    which is one of the following three values: 'bookmark'|'folder'|'separator'
  */
-function getBtnType(node) {
+function getBmtnType(node) {
   if (node.type) {
     return node.type;
   } else {
