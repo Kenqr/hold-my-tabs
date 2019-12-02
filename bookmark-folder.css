@@ -40,8 +40,8 @@ html, body {
 
 /* Bookmark Tree Node */
 .bmtn {
-    display: block;
-    text-decoration: none;
+    position: relative;
+    display: flex;
 }
 .bmtn:focus,
 .bmtn:hover {
@@ -51,15 +51,50 @@ html, body {
     outline: 0;
 }
 
-.bmtn_folder {
-    color: hsl(230, 100%, 50%);
-}
-.bmtn_bookmark {
-    color: hsl(120, 100%, 25%);
-}
 .bmtn_separator {
     line-height: 0.6em;
 }
 .bmtn_separator:hover {
     background-color: transparent;
+}
+
+.bmtn > * {
+    margin: 0 3px;
+}
+
+.bmtn__button-set {
+    width: 2em;
+    opacity: 0;
+}
+.bmtn:hover .bmtn__button-set {
+    opacity: 1;
+}
+
+.bmtn__button {
+    width: 2em;
+    height: 2em;
+    font-size: 0.5em;
+    padding: 0;
+}
+
+.bmtn__body {
+    flex: 1 1 auto;
+    display: flex;
+    text-decoration: none;
+}
+
+.bmtn__body > * {
+    margin: 0 2px;
+}
+
+.bmtn_bookmark .bmtn__body {
+    color: hsl(120, 100%, 25%);
+}
+
+.bmtn_folder .bmtn__body {
+    color: hsl(230, 100%, 50%);
+}
+
+.bmtn__icon {
+    width: 1em;
 }

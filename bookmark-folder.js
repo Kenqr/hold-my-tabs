@@ -17,7 +17,7 @@ const init = async function() {
 
 async function renderFolderTree() {
   const rootNode = (await browser.bookmarks.getTree())[0];
-  const rootFolderTree = createBookmarkTree(rootNode, false);
+  const rootFolderTree = createBookmarkTree(rootNode, true);
   document.querySelector('#folderTree').appendChild(rootFolderTree);
 }
 
@@ -36,59 +36,159 @@ async function renderBookmarkTree() {
   }
 }
 
-function createBookmarkTree(node, showBookmarks=true) {
+function createBookmarkTree(node, folderOnly=false) {
   const ul = document.createElement('ul');
   ul.classList.add('bookmark-folder-content');
   for (child of node.children) {
-    // Skip bookmarks if showBookmarks==false
-    if (!showBookmarks && getBtnType(child) === 'bookmark') continue;
+    // Skip non-folders if folderOnly==true
+    if (folderOnly && getBmtnType(child) !== 'folder') continue;
 
     // Create list item
     const li = document.createElement('li');
-    switch (getBtnType(child)) {
+    li.classList.add('bmti'); // Bookmark tree item
+    li.dataset.bookmarkId = child.id;
+
+    const bmtn = document.createElement('div');
+    li.appendChild(bmtn);
+
+    const buttonSet = document.createElement('div');
+    buttonSet.classList.add('bmtn__button-set');
+    bmtn.appendChild(buttonSet);
+
+    switch (getBmtnType(child)) {
       case 'separator': {
-        const div = document.createElement('div');
-        div.classList.add('bmtn', 'bmtn_separator');
-        div.textContent = '--------------------------------';
-        li.appendChild(div);
+        bmtn.classList.add('bmtn', 'bmtn_separator');
+
+        const deleteButton = createBmtnButton('🗑️', deleteBookmarkButtonEventHandler);
+        buttonSet.appendChild(deleteButton);
+
+        const bmtnBody = document.createElement('div');
+        bmtnBody.classList.add('bmtn__body');
+        bmtn.appendChild(bmtnBody);
+
+        const title = document.createElement('span');
+        title.classList.add('bmtn__title');
+        title.textContent = '--------------------------------';
+        bmtnBody.appendChild(title);
+
         break;
       }
       case 'bookmark': {
-        const anchor = document.createElement('a');
-        anchor.classList.add('bmtn', 'bmtn_bookmark');
-        anchor.href = child.url;
-        anchor.target = '_blank';
+        bmtn.classList.add('bmtn', 'bmtn_bookmark');
 
+        const deleteButton = createBmtnButton('🗑️', deleteBookmarkButtonEventHandler);
+        buttonSet.appendChild(deleteButton);
+
+        const renameButton = createBmtnButton('✏', renameBookmarkButtonEventHandler);
+        buttonSet.appendChild(renameButton);
+
+        const bmtnBody = document.createElement('a');
+        bmtnBody.classList.add('bmtn__body');
+        bmtnBody.href = child.url;
+        bmtnBody.target = '_blank';
+        bmtn.appendChild(bmtnBody);
+
+        const icon = document.createElement('div');
+        icon.classList.add('bmtn__icon');
         const favicon = document.createElement('img');
         favicon.src = getFavicon(child.url);
         favicon.width = 16;
+        icon.appendChild(favicon);
+        bmtnBody.appendChild(icon);
 
         const title = document.createElement('span');
+        title.classList.add('bmtn__title');
         title.textContent = child.title;
+        bmtnBody.appendChild(title);
 
-        anchor.appendChild(favicon);
-        anchor.appendChild(title);
-        li.appendChild(anchor);
         break;
       }
       case 'folder': {
-        const anchor = document.createElement('a');
-        anchor.classList.add('bmtn', 'bmtn_folder');
-        anchor.href = '#'+child.id;
-        anchor.textContent = '📁'+child.title;
-        li.appendChild(anchor);
+        bmtn.classList.add('bmtn', 'bmtn_folder');
+
+        const deleteButton = createBmtnButton('🗑️', deleteBookmarkButtonEventHandler);
+        buttonSet.appendChild(deleteButton);
+
+        const renameButton = createBmtnButton('✏', renameBookmarkButtonEventHandler);
+        buttonSet.appendChild(renameButton);
+
+        const bmtnBody = document.createElement('a');
+        bmtnBody.classList.add('bmtn__body');
+        bmtnBody.href = '#'+child.id;
+        bmtn.appendChild(bmtnBody);
+
+        const icon = document.createElement('div');
+        icon.classList.add('bmtn__icon');
+        icon.textContent = '📁';
+        bmtnBody.appendChild(icon);
+
+        const title = document.createElement('span');
+        title.classList.add('bmtn__title');
+        title.textContent = child.title;
+        bmtnBody.appendChild(title);
+
         break;
       }
     }
     ul.appendChild(li);
 
     // Create child list
-    if (getBtnType(child) === 'folder') {
-      const subTree = createBookmarkTree(child, showBookmarks);
+    if (getBmtnType(child) === 'folder') {
+      const subTree = createBookmarkTree(child, folderOnly);
       if (subTree.hasChildNodes()) li.appendChild(subTree);
     }
   }
   return ul;
+}
+
+function createBmtnButton(text, eventHandler) {
+  const button = document.createElement('button');
+  button.classList.add('bmtn__button');
+  button.textContent = text;
+  button.addEventListener('click', eventHandler);
+  return button;
+}
+
+async function deleteBookmarkButtonEventHandler(event) {
+  // Get list item and bookmark id
+  const bmti = event.target.closest('.bmti');
+  const bookmarkId = bmti.dataset.bookmarkId;
+  const node = (await browser.bookmarks.get(bookmarkId))[0];
+  const nodeType = getBmtnType(node);
+
+  // Confirm deletion
+  const msg = `
+    Do you want to delete this ${nodeType}?
+    This action cannot be undone.
+  `;
+  const confirmed = (nodeType === 'separator') ? true : confirm(msg);
+  if (!confirmed) return;
+
+  // Delete DOM element and bookmark
+  bmti.remove();
+  if (nodeType === 'folder') {
+    browser.bookmarks.removeTree(bookmarkId);
+  } else {
+    browser.bookmarks.remove(bookmarkId);
+  }
+}
+
+async function renameBookmarkButtonEventHandler(event) {
+  // Get list item and bookmark id
+  const bmti = event.target.closest('.bmti');
+  const bookmarkId = bmti.dataset.bookmarkId;
+  const bookmarkTreeNode = (await(browser.bookmarks.get(bookmarkId)))[0];
+
+  const newTitle = prompt('Rename bookmark to:', bookmarkTreeNode.title);
+  if (newTitle !== null) {
+    // Rename list item and bookmark
+    const bmtn = event.target.closest('.bmtn');
+    bmtn.querySelector('.bmtn__title').textContent = newTitle;
+    browser.bookmarks.update(
+      bookmarkId,
+      {title: newTitle}
+    );
+  }
 }
 
 function getFavicon(url) {
@@ -105,7 +205,7 @@ function getFavicon(url) {
  * @returns {string} The type of the bookmark tree node,
  *    which is one of the following three values: 'bookmark'|'folder'|'separator'
  */
-function getBtnType(node) {
+function getBmtnType(node) {
   if (node.type) {
     return node.type;
   } else {
