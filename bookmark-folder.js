@@ -121,6 +121,12 @@ function createBookmarkTree(node, folderOnly=false) {
         deleteButton.addEventListener('click', deleteBookmarkButtonEventHandler);
         buttonSet.appendChild(deleteButton);
 
+        const renameButton = document.createElement('button');
+        renameButton.classList.add('bmtn__button');
+        renameButton.textContent = '✏';
+        renameButton.addEventListener('click', renameBookmarkButtonEventHandler);
+        buttonSet.appendChild(renameButton);
+
         const bmtnBody = document.createElement('a');
         bmtnBody.classList.add('bmtn__body');
         bmtnBody.href = '#'+child.id;
