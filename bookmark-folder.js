@@ -59,6 +59,12 @@ function createBookmarkTree(node, folderOnly=false) {
       case 'separator': {
         bmtn.classList.add('bmtn', 'bmtn_separator');
 
+        const deleteButton = document.createElement('button');
+        deleteButton.classList.add('bmtn__button');
+        deleteButton.textContent = '🗑️';
+        deleteButton.addEventListener('click', deleteBookmarkButtonEventHandler);
+        buttonSet.appendChild(deleteButton);
+
         const bmtnBody = document.createElement('div');
         bmtnBody.classList.add('bmtn__body');
         bmtn.appendChild(bmtnBody);
@@ -109,6 +115,12 @@ function createBookmarkTree(node, folderOnly=false) {
       case 'folder': {
         bmtn.classList.add('bmtn', 'bmtn_folder');
 
+        const deleteButton = document.createElement('button');
+        deleteButton.classList.add('bmtn__button');
+        deleteButton.textContent = '🗑️';
+        deleteButton.addEventListener('click', deleteBookmarkButtonEventHandler);
+        buttonSet.appendChild(deleteButton);
+
         const bmtnBody = document.createElement('a');
         bmtnBody.classList.add('bmtn__body');
         bmtnBody.href = '#'+child.id;
@@ -138,18 +150,26 @@ function createBookmarkTree(node, folderOnly=false) {
   return ul;
 }
 
-function deleteBookmarkButtonEventHandler(event) {
+async function deleteBookmarkButtonEventHandler(event) {
   // Get list item and bookmark id
   const bmti = event.target.closest('.bmti');
   const bookmarkId = bmti.dataset.bookmarkId;
+  const node = (await browser.bookmarks.get(bookmarkId))[0];
+  const nodeType = getBtnType(node);
 
+  // Confirm deletion
   const msg = `
-    Do you want to delete this bookmark?
+    Do you want to delete this ${nodeType}?
     This action cannot be undone.
   `;
-  if (confirm(msg)) {
-    // Delete list item and bookmark
-    bmti.remove();
+  const confirmed = (nodeType === 'separator') ? true : confirm(msg);
+  if (!confirmed) return;
+
+  // Delete DOM element and bookmark
+  bmti.remove();
+  if (nodeType === 'folder') {
+    browser.bookmarks.removeTree(bookmarkId);
+  } else {
     browser.bookmarks.remove(bookmarkId);
   }
 }
