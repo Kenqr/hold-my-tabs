@@ -10,7 +10,7 @@ const init = async function() {
   });
 
   // Show folder tree if no folder is selected
-  if (location.hash==='') {
+  if (!getCurrentFolderId()) {
     document.querySelector('#folderTreeDiv').classList.remove('hidden');
   }
 };
@@ -23,11 +23,11 @@ async function renderFolderTree() {
 
 async function renderBookmarkTree() {
   document.querySelector('#bookmarkTree').innerHTML = '';
-  if (location.hash=='') {
+  const folderId = getCurrentFolderId();
+  if (!folderId) {
     document.title = 'Hold My Tabs';
     document.querySelector('#folderTitle').innerHTML = '';
   } else {
-    const folderId = location.hash.substring(1);
     const subTree = (await browser.bookmarks.getSubTree(folderId))[0];
     document.querySelector('#folderTitle').textContent = subTree.title;
     document.title = subTree.title + ' - Hold My Tabs';
@@ -196,6 +196,15 @@ function getFavicon(url) {
   const anchor = document.createElement('a');
   anchor.href = url;
   return 'http://www.google.com/s2/favicons?domain=' + anchor.hostname;
+}
+
+/**
+ * Get current folder id from hash
+ * 
+ * @returns {?string} Current folder id, or null if no folder is selected.
+ */
+function getCurrentFolderId() {
+  return (location.hash === '') ? null : location.hash.substring(1);
 }
 
 /**
