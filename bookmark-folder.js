@@ -82,6 +82,9 @@ function createBookmarkTree(node, folderOnly=false) {
         const deleteButton = createBmtnButton('🗑️', deleteBookmarkButtonEventHandler);
         buttonSet.appendChild(deleteButton);
 
+        const openAndDeleteButton = createBmtnButton('↗️', openAndDeleteBookmarkButtonEventHandler);
+        buttonSet.appendChild(openAndDeleteButton);
+
         const renameButton = createBmtnButton('✏', renameBookmarkButtonEventHandler);
         buttonSet.appendChild(renameButton);
 
@@ -174,6 +177,22 @@ async function deleteBookmarkButtonEventHandler(event) {
   } else {
     browser.bookmarks.remove(bookmarkId);
   }
+}
+
+async function openAndDeleteBookmarkButtonEventHandler(event) {
+  // Get list item and bookmark id
+  const bmti = event.target.closest('.bmti');
+  const bookmarkId = bmti.dataset.bookmarkId;
+  const bookmark = (await browser.bookmarks.get(bookmarkId))[0];
+
+  // Open url in a new tab
+  browser.tabs.create({
+    url: bookmark.url,
+  });
+
+  // Delete DOM element and bookmark
+  bmti.remove();
+  browser.bookmarks.remove(bookmarkId);
 }
 
 async function renameBookmarkButtonEventHandler(event) {
