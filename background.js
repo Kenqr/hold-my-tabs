@@ -54,15 +54,31 @@ async function getFolderFromHmtTab(hmtTab) {
     }
 }
 
-async function moveTabToFolder(tab, folder) {
-    // Bookmark current tab
-    await browser.bookmarks.create({
-        parentId: folder.id,
-        index: folder.children.length,
-        title: tab.title,
-        url: tab.url,
-    });
+/**
+ * Check if folder contains a direct child with url.
+ *
+ * @param {bookmarks.BookmarkTreeNode} folder
+ * @param {string} url 
+ * @returns {boolean}
+ */
+function folderHasChildWithUrl(folder, url) {
+    for (const child of folder.children) {
+        if (child.url === url) return true;
+    }
+    return false;
+}
 
-    // Close current tab
+async function moveTabToFolder(tab, folder) {
+    // Bookmark the tab if it is not already in the folder
+    if (!folderHasChildWithUrl(folder, tab.url)) {
+        await browser.bookmarks.create({
+            parentId: folder.id,
+            index: folder.children.length,
+            title: tab.title,
+            url: tab.url,
+        });
+    }
+
+    // Close the tab
     return browser.tabs.remove(tab.id);
 }
