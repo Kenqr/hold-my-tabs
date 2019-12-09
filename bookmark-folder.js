@@ -13,6 +13,9 @@ const init = async function() {
   if (!getCurrentFolderId()) {
     document.querySelector('#folderTreeDiv').classList.remove('hidden');
   }
+
+  // Auto update bookmark tree
+  browser.bookmarks.onCreated.addListener(onBookmarkCreated);
 };
 
 async function renderFolderTree() {
@@ -196,6 +199,19 @@ function getFavicon(url) {
   const anchor = document.createElement('a');
   anchor.href = url;
   return 'http://www.google.com/s2/favicons?domain=' + anchor.hostname;
+}
+
+async function onBookmarkCreated(id, bookmark) {
+  const folderId = getCurrentFolderId();
+
+  // Re-render bookmark tree if current folder is the new bookmark's ancestor
+  while (bookmark.parentId) {
+    bookmark = (await browser.bookmarks.get(bookmark.parentId))[0];
+    if (bookmark.id === folderId) {
+      renderBookmarkTree();
+      return;
+    }
+  }
 }
 
 /**
