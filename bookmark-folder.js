@@ -62,7 +62,11 @@ function createBookmarkTree(node, folderOnly=false) {
       case 'separator': {
         bmtn.classList.add('bmtn', 'bmtn_separator');
 
-        const deleteButton = createBmtnButton('🗑️', deleteBookmarkButtonEventHandler);
+        const deleteButton = createBmtnButton(
+          '🗑️',
+          deleteBookmarkButtonEventHandler,
+          'Delete'
+        );
         buttonSet.appendChild(deleteButton);
 
         const bmtnBody = document.createElement('div');
@@ -79,13 +83,25 @@ function createBookmarkTree(node, folderOnly=false) {
       case 'bookmark': {
         bmtn.classList.add('bmtn', 'bmtn_bookmark');
 
-        const deleteButton = createBmtnButton('🗑️', deleteBookmarkButtonEventHandler);
+        const deleteButton = createBmtnButton(
+          '🗑️',
+          deleteBookmarkButtonEventHandler,
+          'Delete'
+        );
         buttonSet.appendChild(deleteButton);
 
-        const openAndDeleteButton = createBmtnButton('↗️', openAndDeleteBookmarkButtonEventHandler);
+        const openAndDeleteButton = createBmtnButton(
+          '↗️',
+          openAndDeleteBookmarkButtonEventHandler,
+          'Open & Delete'
+        );
         buttonSet.appendChild(openAndDeleteButton);
 
-        const renameButton = createBmtnButton('✏', renameBookmarkButtonEventHandler);
+        const renameButton = createBmtnButton(
+          '✏',
+          renameBookmarkButtonEventHandler,
+          'Rename'
+        );
         buttonSet.appendChild(renameButton);
 
         const bmtnBody = document.createElement('a');
@@ -112,10 +128,18 @@ function createBookmarkTree(node, folderOnly=false) {
       case 'folder': {
         bmtn.classList.add('bmtn', 'bmtn_folder');
 
-        const deleteButton = createBmtnButton('🗑️', deleteBookmarkButtonEventHandler);
+        const deleteButton = createBmtnButton(
+          '🗑️',
+          deleteBookmarkButtonEventHandler,
+          'Delete'
+        );
         buttonSet.appendChild(deleteButton);
 
-        const renameButton = createBmtnButton('✏', renameBookmarkButtonEventHandler);
+        const renameButton = createBmtnButton(
+          '✏',
+          renameBookmarkButtonEventHandler,
+          'Rename'
+        );
         buttonSet.appendChild(renameButton);
 
         const bmtnBody = document.createElement('a');
@@ -147,11 +171,12 @@ function createBookmarkTree(node, folderOnly=false) {
   return ul;
 }
 
-function createBmtnButton(text, eventHandler) {
+function createBmtnButton(text, eventHandler, title) {
   const button = document.createElement('button');
   button.classList.add('bmtn__button');
   button.textContent = text;
   button.addEventListener('click', eventHandler);
+  if (title) button.title = title;
   return button;
 }
 
