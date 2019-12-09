@@ -63,7 +63,7 @@ html, body {
 }
 
 .bmtn__button-set {
-    width: 2em;
+    width: 3em;
     opacity: 0;
 }
 .bmtn:hover .bmtn__button-set {
