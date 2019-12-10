@@ -6,30 +6,41 @@ function init() {
   });
 
   browser.menus.create({
+    id: "add-to-folder",
+    title: "Add to Folder",
+    contexts: ["all"],
+  });
+
+  browser.menus.create({
     id: "open-hmt-page",
     title: "Open HMT Page",
     contexts: ["all"],
   });
 
   browser.menus.onClicked.addListener(async (info, tab) => {
-    switch (info.menuItemId) {
-      case 'move-to-folder': {
-        try {
-          const hmtTab = await findClosestHmtTabOnLeft(tab.index);
-          if (!hmtTab) throw 'HMT tab does not exist.';
+    const hmtTab = await findClosestHmtTabOnLeft(tab.index);
 
+    try {
+      switch (info.menuItemId) {
+        case 'move-to-folder': {
+          if (!hmtTab) throw 'HMT tab does not exist.';
           await addTabToHmtTab(tab, hmtTab);
           await browser.tabs.remove(tab.id); // Close the tab
-        } catch (e) {
-          // Do nothing
+          break;
         }
-        break;
+        case 'add-to-folder': {
+          if (!hmtTab) throw 'HMT tab does not exist.';
+          await addTabToHmtTab(tab, hmtTab);
+          break;
+        }
+        case 'open-hmt-page': {
+          // Open extension page previous to current tab
+          openHmtPage(tab.index);
+          break;
+        }
       }
-      case 'open-hmt-page': {
-        // Open extension page previous to current tab
-        openHmtPage(tab.index);
-        break;
-      }
+    } catch (e) {
+      // Do nothing
     }
   });
 
