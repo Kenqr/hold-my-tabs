@@ -15,7 +15,11 @@ function init() {
     switch (info.menuItemId) {
       case 'move-to-folder': {
         try {
-          await moveTabToLeftHmtFolder(tab);
+          const hmtTab = await findClosestHmtTabOnLeft(tab.index);
+          if (!hmtTab) throw 'HMT tab does not exist.';
+
+          await addTabToHmtTab(tab, hmtTab);
+          await browser.tabs.remove(tab.id); // Close the tab
         } catch (e) {
           // Do nothing
         }
@@ -31,7 +35,11 @@ function init() {
 
   browser.browserAction.onClicked.addListener(async (tab, onClickData) => {
     try {
-      await moveTabToLeftHmtFolder(tab);
+      const hmtTab = await findClosestHmtTabOnLeft(tab.index);
+      if (!hmtTab) throw 'HMT tab does not exist.';
+    
+      await addTabToHmtTab(tab, hmtTab);
+      await browser.tabs.remove(tab.id); // Close the tab
     } catch (e) {
       // Open extension page previous to current tab
       openHmtPage(tab.index);
@@ -93,38 +101,42 @@ function folderHasChildWithUrl(folder, url) {
 }
 
 /**
- * Move tab into closest HMT tab on the left side.
- * @param {tab.Tab} tab - The tab to be moved.
+ * Add tab into HMT tab.
+ * @param {tabs.Tab} tab - The tab to be moved.
+ * @param {tabs.Tab} hmtTab - The HMT tab to be moved into.
  * @throws {string}
+ * @returns {?Promise<bookmarks.BookmarkTreeNode>}
+ *    The newly created bookmark, or null if the tab is already bookmarked.
  */
-async function moveTabToLeftHmtFolder(tab) {
-  const hmtTab = await findClosestHmtTabOnLeft(tab.index);
-  if (!hmtTab) throw 'HMT tab does not exist.';
-
+async function addTabToHmtTab(tab, hmtTab) {
   // Get folder data
   const folder = await getFolderFromHmtTab(hmtTab);
   if (!folder) throw 'No folder selected';
 
-  try {
-    moveTabToFolder(tab, folder);
-  } catch (e) {
-    throw `Cannot move tab to folder: "${folder.title}"`;
-  }
+  return addTabToFolder(tab, folder);
 }
 
-async function moveTabToFolder(tab, folder) {
-  // Bookmark the tab if it is not already in the folder
-  if (!folderHasChildWithUrl(folder, tab.url)) {
-    await browser.bookmarks.create({
+/**
+ * Bookmark the tab if it is not already in the folder.
+ * @param {tabs.Tab} tab 
+ * @param {bookmarks.BookmarkTreeNode} folder 
+ * @throws {string}
+ * @returns {?Promise<bookmarks.BookmarkTreeNode>}
+ *    The newly created bookmark, or null if the tab is already bookmarked.
+ */
+async function addTabToFolder(tab, folder) {
+  if (folderHasChildWithUrl(folder, tab.url)) return null;
+
+  try {
+    return await browser.bookmarks.create({
       parentId: folder.id,
       index: folder.children.length,
       title: tab.title,
       url: tab.url,
     });
+  } catch (e) {
+    throw `Cannot add tab to folder: "${folder.title}"`;
   }
-  
-  // Close the tab
-  return browser.tabs.remove(tab.id);
 }
 
 init();
