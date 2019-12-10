@@ -1,3 +1,19 @@
+browser.menus.create({
+  id: "open-hmt-page",
+  title: "Open HMT Page",
+  contexts: ["all"],
+});
+
+browser.menus.onClicked.addListener(async function(info, tab){
+  switch (info.menuItemId) {
+    case 'open-hmt-page': {
+      // Open extension page previous to current tab
+      openHmtPage(tab.index);
+      break;
+    }
+  }
+});
+
 browser.browserAction.onClicked.addListener(async function(){
   // Get current tab
   const currentTab = (await browser.tabs.query({currentWindow: true, active: true}))[0];
@@ -14,13 +30,17 @@ browser.browserAction.onClicked.addListener(async function(){
       // Do nothing
     }
   } else {
-    // Open extension page
-    browser.tabs.create({
-      url: "/bookmark-folder.html",
-      index: currentTab.index, // Previous to current tab
-    });
+    // Open extension page previous to current tab
+    openHmtPage(currentTab.index);
   }
 });
+
+function openHmtPage(index) {
+  return browser.tabs.create({
+    url: "/bookmark-folder.html",
+    index: index,
+  });
+}
 
 async function findClosestHmtTabOnLeft(currentTabIndex) {
   // Get extension page url
