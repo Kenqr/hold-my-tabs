@@ -1,4 +1,4 @@
-function init() {
+const init = () => {
   browser.menus.create({
     id: "move-to-folder",
     title: "Move to Folder",
@@ -56,16 +56,16 @@ function init() {
       openHmtPage(tab.index);
     }
   });
-}
+};
 
-function openHmtPage(index) {
+const openHmtPage = (index) => {
   return browser.tabs.create({
     url: "/bookmark-folder.html",
     index: index,
   });
-}
+};
 
-async function findClosestHmtTabOnLeft(currentTabIndex) {
+const findClosestHmtTabOnLeft = async (currentTabIndex) => {
   // Get extension page url
   const url = browser.runtime.getURL('bookmark-folder.html');
   
@@ -84,9 +84,9 @@ async function findClosestHmtTabOnLeft(currentTabIndex) {
   }
   
   return null;
-}
+};
 
-async function getFolderFromHmtTab(hmtTab) {
+const getFolderFromHmtTab = async (hmtTab) => {
   const url = new URL(hmtTab.url);
   const folderId = url.hash.substring(1);
   
@@ -95,7 +95,7 @@ async function getFolderFromHmtTab(hmtTab) {
   } else {
     return null;
   }
-}
+};
 
 /**
 * Check if folder contains a direct child with url.
@@ -104,12 +104,12 @@ async function getFolderFromHmtTab(hmtTab) {
 * @param {string} url 
 * @returns {boolean}
 */
-function folderHasChildWithUrl(folder, url) {
+const folderHasChildWithUrl = (folder, url) => {
   for (const child of folder.children) {
     if (child.url === url) return true;
   }
   return false;
-}
+};
 
 /**
  * Add tab into HMT tab.
@@ -119,13 +119,13 @@ function folderHasChildWithUrl(folder, url) {
  * @returns {?Promise<bookmarks.BookmarkTreeNode>}
  *    The newly created bookmark, or null if the tab is already bookmarked.
  */
-async function addTabToHmtTab(tab, hmtTab) {
+const addTabToHmtTab = async (tab, hmtTab) => {
   // Get folder data
   const folder = await getFolderFromHmtTab(hmtTab);
   if (!folder) throw 'No folder selected';
 
   return addTabToFolder(tab, folder);
-}
+};
 
 /**
  * Bookmark the tab if it is not already in the folder.
@@ -135,7 +135,7 @@ async function addTabToHmtTab(tab, hmtTab) {
  * @returns {?Promise<bookmarks.BookmarkTreeNode>}
  *    The newly created bookmark, or null if the tab is already bookmarked.
  */
-async function addTabToFolder(tab, folder) {
+const addTabToFolder = async (tab, folder) => {
   if (folderHasChildWithUrl(folder, tab.url)) return null;
 
   try {
@@ -148,6 +148,6 @@ async function addTabToFolder(tab, folder) {
   } catch (e) {
     throw `Cannot add tab to folder: "${folder.title}"`;
   }
-}
+};
 
 init();
