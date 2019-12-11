@@ -27,16 +27,11 @@ const renderFolderTree = async () => {
 const renderBookmarkTree = async () => {
   document.querySelector('#bookmarkTree').innerHTML = '';
   const folderId = getCurrentFolderId();
-  if (!folderId) {
-    document.title = 'Hold My Tabs';
-    document.querySelector('#folderTitle').innerHTML = '';
-  } else {
-    const subTree = (await browser.bookmarks.getSubTree(folderId))[0];
-    document.querySelector('#folderTitle').textContent = subTree.title;
-    document.title = subTree.title + ' - Hold My Tabs';
-    const bookmarkTree = createBookmarkTree(subTree);
-    document.querySelector('#bookmarkTree').appendChild(bookmarkTree);
-  }
+  const subTree = (await browser.bookmarks.getSubTree(folderId))[0];
+  document.querySelector('#folderTitle').textContent = subTree.title;
+  document.title = subTree.title + ' - Hold My Tabs';
+  const bookmarkTree = createBookmarkTree(subTree);
+  document.querySelector('#bookmarkTree').appendChild(bookmarkTree);
 };
 
 const createBookmarkTree = (node, folderOnly = false) => {
@@ -264,7 +259,7 @@ const onBookmarkCreated = async (id, bookmark) => {
  * @returns {?string} Current folder id, or null if no folder is selected.
  */
 const getCurrentFolderId = () => {
-  return (location.hash === '') ? null : location.hash.substring(1);
+  return location.hash ? location.hash.substring(1) : 'unfiled_____';
 };
 
 /**

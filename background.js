@@ -88,13 +88,9 @@ const findClosestHmtTabOnLeft = async (currentTabIndex) => {
 
 const getFolderFromHmtTab = async (hmtTab) => {
   const url = new URL(hmtTab.url);
-  const folderId = url.hash.substring(1);
-  
-  if (folderId) {
-    return (await browser.bookmarks.getSubTree(folderId))[0];
-  } else {
-    return null;
-  }
+  const folderId = url.hash ? url.hash.substring(1) : 'unfiled_____';
+
+  return (await browser.bookmarks.getSubTree(folderId))[0];
 };
 
 /**
@@ -115,14 +111,12 @@ const folderHasChildWithUrl = (folder, url) => {
  * Add tab into HMT tab.
  * @param {tabs.Tab} tab - The tab to be moved.
  * @param {tabs.Tab} hmtTab - The HMT tab to be moved into.
- * @throws {string}
  * @returns {?Promise<bookmarks.BookmarkTreeNode>}
  *    The newly created bookmark, or null if the tab is already bookmarked.
  */
 const addTabToHmtTab = async (tab, hmtTab) => {
   // Get folder data
   const folder = await getFolderFromHmtTab(hmtTab);
-  if (!folder) throw 'No folder selected';
 
   return addTabToFolder(tab, folder);
 };
