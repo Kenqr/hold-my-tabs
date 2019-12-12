@@ -6,8 +6,8 @@ const init = () => {
   });
 
   browser.menus.create({
-    id: "add-to-folder",
-    title: "Add to Folder",
+    id: "copy-to-folder",
+    title: "Copy to Folder",
     contexts: ["all"],
   });
 
@@ -24,13 +24,13 @@ const init = () => {
       switch (info.menuItemId) {
         case 'move-to-folder': {
           if (!hmtTab) throw 'HMT tab does not exist.';
-          await addTabToHmtTab(tab, hmtTab);
+          await copyTabToHmtTab(tab, hmtTab);
           await browser.tabs.remove(tab.id); // Close the tab
           break;
         }
-        case 'add-to-folder': {
+        case 'copy-to-folder': {
           if (!hmtTab) throw 'HMT tab does not exist.';
-          await addTabToHmtTab(tab, hmtTab);
+          await copyTabToHmtTab(tab, hmtTab);
           break;
         }
         case 'open-hmt-page': {
@@ -49,7 +49,7 @@ const init = () => {
       const hmtTab = await findClosestHmtTabOnLeft(tab.index);
       if (!hmtTab) throw 'HMT tab does not exist.';
     
-      await addTabToHmtTab(tab, hmtTab);
+      await copyTabToHmtTab(tab, hmtTab);
       await browser.tabs.remove(tab.id); // Close the tab
     } catch (e) {
       // Open extension page previous to current tab
@@ -108,17 +108,17 @@ const folderHasChildWithUrl = (folder, url) => {
 };
 
 /**
- * Add tab into HMT tab.
- * @param {tabs.Tab} tab - The tab to be moved.
- * @param {tabs.Tab} hmtTab - The HMT tab to be moved into.
+ * Copy tab into HMT tab.
+ * @param {tabs.Tab} tab - The tab to be copied.
+ * @param {tabs.Tab} hmtTab - The HMT tab to be copied into.
  * @returns {?Promise<bookmarks.BookmarkTreeNode>}
  *    The newly created bookmark, or null if the tab is already bookmarked.
  */
-const addTabToHmtTab = async (tab, hmtTab) => {
+const copyTabToHmtTab = async (tab, hmtTab) => {
   // Get folder data
   const folder = await getFolderFromHmtTab(hmtTab);
 
-  return addTabToFolder(tab, folder);
+  return copyTabToFolder(tab, folder);
 };
 
 /**
@@ -129,7 +129,7 @@ const addTabToHmtTab = async (tab, hmtTab) => {
  * @returns {?Promise<bookmarks.BookmarkTreeNode>}
  *    The newly created bookmark, or null if the tab is already bookmarked.
  */
-const addTabToFolder = async (tab, folder) => {
+const copyTabToFolder = async (tab, folder) => {
   if (folderHasChildWithUrl(folder, tab.url)) return null;
 
   try {
