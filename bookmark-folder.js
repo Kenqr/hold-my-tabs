@@ -10,7 +10,7 @@ const init = async () => {
   });
 
   // Show folder tree if no folder is selected
-  if (!getCurrentFolderId()) {
+  if (!location.hash) {
     document.querySelector('#folderTreeDiv').classList.remove('hidden');
   }
 
