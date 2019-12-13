@@ -12,6 +12,18 @@ const init = () => {
   });
 
   browser.menus.create({
+    id: 'move-tabs-to-folder',
+    title: 'Move Tabs to Folder',
+    contexts: ['all', 'tab'],
+  });
+
+  browser.menus.create({
+    id: 'copy-tabs-to-folder',
+    title: 'Copy Tabs to Folder',
+    contexts: ['all', 'tab'],
+  });
+
+  browser.menus.create({
     id: 'open-hmt-page',
     title: 'Open HMT Page',
     contexts: ['all', 'tab'],
@@ -31,6 +43,16 @@ const init = () => {
         case 'copy-to-folder': {
           if (!hmtTab) throw 'HMT tab does not exist.';
           await copyTabToHmtTab(tab, hmtTab);
+          break;
+        }
+        case 'move-tabs-to-folder': {
+          if (!hmtTab) throw 'HMT tab does not exist.';
+          await menuMoveTabsToFolder(tab, hmtTab);
+          break;
+        }
+        case 'copy-tabs-to-folder': {
+          if (!hmtTab) throw 'HMT tab does not exist.';
+          await menuCopyTabsToFolder(tab, hmtTab);
           break;
         }
         case 'open-hmt-page': {
@@ -142,6 +164,49 @@ const copyTabToFolder = async (tab, folder) => {
   } catch (e) {
     throw `Cannot add tab to folder: "${folder.title}"`;
   }
+};
+
+/**
+ * Bookmark & close tabs between this tab and previous HMT tab.
+ * @param {tabs.Tab} tab - This tab.
+ * @param {tabs.Tab} hmtTab - Previous HMT tab.
+ */
+const menuMoveTabsToFolder = async (tab, hmtTab) => {
+  const tabsCopied = await menuCopyTabsToFolder(tab, hmtTab);
+  for (tab of tabsCopied) {
+    browser.tabs.remove(tab.id); // Close the tab
+  }
+};
+
+/**
+ * Bookmark tabs between this tab and previous HMT tab.
+ * @param {tabs.Tab} tab - This tab.
+ * @param {tabs.Tab} hmtTab - Previous HMT tab.
+ * @returns {tabs.Tab[]} Bookmarked tabs.
+ */
+const menuCopyTabsToFolder = async (tab, hmtTab) => {
+  const folder = await getFolderFromHmtTab(hmtTab);
+
+  // Get to-be-copied tab list
+  const startIndex = hmtTab.index + 1;
+  const endIndex = tab.index;
+  const tabsInWindow = await browser.tabs.query({
+    currentWindow: true,
+  });
+  const tabsToBeCopied = tabsInWindow.slice(startIndex, endIndex + 1);
+
+  // Copy tabs
+  const tabsCopied = [];
+  for (tab of tabsToBeCopied) {
+    try {
+      await copyTabToFolder(tab, folder);
+      tabsCopied.push(tab);
+    } catch (e) {
+      // Do nothing
+    }
+  }
+
+  return tabsCopied;
 };
 
 init();
