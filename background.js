@@ -1,20 +1,20 @@
 const init = () => {
   browser.menus.create({
-    id: "move-to-folder",
-    title: "Move to Folder",
-    contexts: ["all", "tab"],
+    id: 'move-to-folder',
+    title: 'Move to Folder',
+    contexts: ['all', 'tab'],
   });
 
   browser.menus.create({
-    id: "copy-to-folder",
-    title: "Copy to Folder",
-    contexts: ["all", "tab"],
+    id: 'copy-to-folder',
+    title: 'Copy to Folder',
+    contexts: ['all', 'tab'],
   });
 
   browser.menus.create({
-    id: "open-hmt-page",
-    title: "Open HMT Page",
-    contexts: ["all", "tab"],
+    id: 'open-hmt-page',
+    title: 'Open HMT Page',
+    contexts: ['all', 'tab'],
   });
 
   browser.menus.onClicked.addListener(async (info, tab) => {
@@ -60,7 +60,7 @@ const init = () => {
 
 const openHmtPage = (index) => {
   return browser.tabs.create({
-    url: "/bookmark-folder.html",
+    url: '/bookmark-folder.html',
     index: index,
   });
 };
