@@ -2,19 +2,19 @@ const init = () => {
   browser.menus.create({
     id: "move-to-folder",
     title: "Move to Folder",
-    contexts: ["all"],
+    contexts: ["all", "tab"],
   });
 
   browser.menus.create({
     id: "copy-to-folder",
     title: "Copy to Folder",
-    contexts: ["all"],
+    contexts: ["all", "tab"],
   });
 
   browser.menus.create({
     id: "open-hmt-page",
     title: "Open HMT Page",
-    contexts: ["all"],
+    contexts: ["all", "tab"],
   });
 
   browser.menus.onClicked.addListener(async (info, tab) => {
