@@ -1,4 +1,4 @@
-const init = async function() {
+const init = async () => {
   renderFolderTree();
 
   renderBookmarkTree();
@@ -10,7 +10,7 @@ const init = async function() {
   });
 
   // Show folder tree if no folder is selected
-  if (!getCurrentFolderId()) {
+  if (!location.hash) {
     document.querySelector('#folderTreeDiv').classList.remove('hidden');
   }
 
@@ -18,28 +18,23 @@ const init = async function() {
   browser.bookmarks.onCreated.addListener(onBookmarkCreated);
 };
 
-async function renderFolderTree() {
+const renderFolderTree = async () => {
   const rootNode = (await browser.bookmarks.getTree())[0];
   const rootFolderTree = createBookmarkTree(rootNode, true);
   document.querySelector('#folderTree').appendChild(rootFolderTree);
-}
+};
 
-async function renderBookmarkTree() {
+const renderBookmarkTree = async () => {
   document.querySelector('#bookmarkTree').innerHTML = '';
   const folderId = getCurrentFolderId();
-  if (!folderId) {
-    document.title = 'Hold My Tabs';
-    document.querySelector('#folderTitle').innerHTML = '';
-  } else {
-    const subTree = (await browser.bookmarks.getSubTree(folderId))[0];
-    document.querySelector('#folderTitle').textContent = subTree.title;
-    document.title = subTree.title + ' - Hold My Tabs';
-    const bookmarkTree = createBookmarkTree(subTree);
-    document.querySelector('#bookmarkTree').appendChild(bookmarkTree);
-  }
-}
+  const subTree = (await browser.bookmarks.getSubTree(folderId))[0];
+  document.querySelector('#folderTitle').textContent = subTree.title;
+  document.title = subTree.title + ' - Hold My Tabs';
+  const bookmarkTree = createBookmarkTree(subTree);
+  document.querySelector('#bookmarkTree').appendChild(bookmarkTree);
+};
 
-function createBookmarkTree(node, folderOnly=false) {
+const createBookmarkTree = (node, folderOnly = false) => {
   const ul = document.createElement('ul');
   ul.classList.add('bookmark-folder-content');
   for (let child of node.children) {
@@ -169,18 +164,18 @@ function createBookmarkTree(node, folderOnly=false) {
     }
   }
   return ul;
-}
+};
 
-function createBmtnButton(text, eventHandler, title) {
+const createBmtnButton = (text, eventHandler, title) => {
   const button = document.createElement('button');
   button.classList.add('bmtn__button');
   button.textContent = text;
   button.addEventListener('click', eventHandler);
   if (title) button.title = title;
   return button;
-}
+};
 
-async function deleteBookmarkButtonEventHandler(event) {
+const deleteBookmarkButtonEventHandler = async (event) => {
   // Get list item and bookmark id
   const bmti = event.target.closest('.bmti');
   const bookmarkId = bmti.dataset.bookmarkId;
@@ -202,9 +197,9 @@ async function deleteBookmarkButtonEventHandler(event) {
   } else {
     browser.bookmarks.remove(bookmarkId);
   }
-}
+};
 
-async function openAndDeleteBookmarkButtonEventHandler(event) {
+const openAndDeleteBookmarkButtonEventHandler = async (event) => {
   // Get list item and bookmark id
   const bmti = event.target.closest('.bmti');
   const bookmarkId = bmti.dataset.bookmarkId;
@@ -218,9 +213,9 @@ async function openAndDeleteBookmarkButtonEventHandler(event) {
   // Delete DOM element and bookmark
   bmti.remove();
   browser.bookmarks.remove(bookmarkId);
-}
+};
 
-async function renameBookmarkButtonEventHandler(event) {
+const renameBookmarkButtonEventHandler = async (event) => {
   // Get list item and bookmark id
   const bmti = event.target.closest('.bmti');
   const bookmarkId = bmti.dataset.bookmarkId;
@@ -236,16 +231,16 @@ async function renameBookmarkButtonEventHandler(event) {
       {title: newTitle}
     );
   }
-}
+};
 
-function getFavicon(url) {
+const getFavicon = (url) => {
   // Use domain name to get favicon from Google S2
   const anchor = document.createElement('a');
   anchor.href = url;
   return 'http://www.google.com/s2/favicons?domain=' + anchor.hostname;
-}
+};
 
-async function onBookmarkCreated(id, bookmark) {
+const onBookmarkCreated = async (id, bookmark) => {
   const folderId = getCurrentFolderId();
 
   // Re-render bookmark tree if current folder is the new bookmark's ancestor
@@ -256,16 +251,16 @@ async function onBookmarkCreated(id, bookmark) {
       return;
     }
   }
-}
+};
 
 /**
  * Get current folder id from hash
  * 
  * @returns {?string} Current folder id, or null if no folder is selected.
  */
-function getCurrentFolderId() {
-  return (location.hash === '') ? null : location.hash.substring(1);
-}
+const getCurrentFolderId = () => {
+  return location.hash ? location.hash.substring(1) : 'unfiled_____';
+};
 
 /**
  * Get the type of the bookmark tree node.
@@ -274,12 +269,12 @@ function getCurrentFolderId() {
  * @returns {string} The type of the bookmark tree node,
  *    which is one of the following three values: 'bookmark'|'folder'|'separator'
  */
-function getBmtnType(node) {
+const getBmtnType = (node) => {
   if (node.type) {
     return node.type;
   } else {
     return node.url ? 'bookmark' : 'folder';
   }
-}
+};
 
 init();
