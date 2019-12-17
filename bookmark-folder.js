@@ -234,10 +234,16 @@ const renameBookmarkButtonEventHandler = async (event) => {
 };
 
 const getFavicon = (url) => {
-  // Use domain name to get favicon from Google S2
-  const anchor = document.createElement('a');
-  anchor.href = url;
-  return 'http://www.google.com/s2/favicons?domain=' + anchor.hostname;
+  const protocol = (new URL(url)).protocol;
+  // Use domain name to get favicon from Google S2 for https and http
+  if (protocol === 'https:' || protocol === 'http:') {
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    return 'http://www.google.com/s2/favicons?domain=' + anchor.hostname;
+  }
+
+  // No favicon for other protocols
+  return '';
 };
 
 const onBookmarkCreated = async (id, bookmark) => {
