@@ -246,17 +246,26 @@ const getFavicon = (url) => {
   return '';
 };
 
-const onBookmarkCreated = async (id, bookmark) => {
+/**
+ * Decides if bookmark is in current folder
+ * 
+ * @param {bookmarks.BookmarkTreeNode} bookmark - The bookmark tree node.
+ * @returns {boolean} Whether bookmark is in current folder or not.
+ */
+ const isInCurrentFolder = async (bookmark) => {
   const folderId = getCurrentFolderId();
 
-  // Re-render bookmark tree if current folder is the new bookmark's ancestor
-  while (bookmark.parentId) {
-    bookmark = (await browser.bookmarks.get(bookmark.parentId))[0];
-    if (bookmark.id === folderId) {
-      renderBookmarkTree();
-      return;
-    }
+  for (let b = bookmark; ; b = (await browser.bookmarks.get(b.parentId))[0]) {
+    if (b.id === folderId) return true;
+    if (!b.parentId) break;
   }
+
+  return false;
+};
+
+const onBookmarkCreated = async (id, bookmark) => {
+  // Re-render bookmark tree if current folder is the new bookmark's ancestor
+  if (isInCurrentFolder(bookmark)) renderBookmarkTree();
 };
 
 /**
