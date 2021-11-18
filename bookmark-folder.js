@@ -18,6 +18,7 @@ const init = async () => {
   browser.bookmarks.onCreated.addListener(onBookmarkCreated);
   browser.bookmarks.onRemoved.addListener(onBookmarkRemoved);
   browser.bookmarks.onChanged.addListener(onBookmarkChanged);
+  browser.bookmarks.onMoved.addListener(onBookmarkMoved);
 };
 
 const renderFolderTree = async () => {
@@ -279,6 +280,14 @@ const onBookmarkChanged = async (id) => {
   // Re-render bookmark tree if current folder is the changed bookmark's ancestor
   if (isInCurrentFolder((await browser.bookmarks.get(id))[0])) renderBookmarkTree();
 }
+
+const onBookmarkMoved = async (id, {parentId, oldParentId}) => {
+  // Re-render bookmark tree if current folder is the moved bookmark's ancestor
+  if (
+    isInCurrentFolder((await browser.bookmarks.get(parentId))[0]) ||
+    isInCurrentFolder((await browser.bookmarks.get(oldParentId))[0])
+  ) renderBookmarkTree();
+};
 
 /**
  * Get current folder id from hash
