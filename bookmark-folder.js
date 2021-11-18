@@ -16,6 +16,7 @@ const init = async () => {
 
   // Auto update bookmark tree
   browser.bookmarks.onCreated.addListener(onBookmarkCreated);
+  browser.bookmarks.onRemoved.addListener(onBookmarkRemoved);
 };
 
 const renderFolderTree = async () => {
@@ -267,6 +268,11 @@ const onBookmarkCreated = async (id, bookmark) => {
   // Re-render bookmark tree if current folder is the new bookmark's ancestor
   if (isInCurrentFolder(bookmark)) renderBookmarkTree();
 };
+
+const onBookmarkRemoved = async (id, {node: bookmark}) => {
+  // Re-render bookmark tree if current folder is the removed bookmark's ancestor
+  if (isInCurrentFolder(bookmark)) renderBookmarkTree();
+}
 
 /**
  * Get current folder id from hash
