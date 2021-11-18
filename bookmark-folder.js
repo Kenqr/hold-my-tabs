@@ -22,6 +22,7 @@ const init = async () => {
 };
 
 const renderFolderTree = async () => {
+  document.querySelector('#folderTree').innerHTML = '';
   const rootNode = (await browser.bookmarks.getTree())[0];
   const rootFolderTree = createBookmarkTree(rootNode, true);
   document.querySelector('#folderTree').appendChild(rootFolderTree);
@@ -267,26 +268,40 @@ const getFavicon = (url) => {
 };
 
 const onBookmarkCreated = async (id, bookmark) => {
+  renderFolderTreeIfIsFolder(id);
+
   // Re-render bookmark tree if current folder is the new bookmark's ancestor
   if (isInCurrentFolder(bookmark)) renderBookmarkTree();
 };
 
 const onBookmarkRemoved = async (id, {node: bookmark}) => {
+  renderFolderTreeIfIsFolder(bookmark);
+
   // Re-render bookmark tree if current folder is the removed bookmark's ancestor
   if (isInCurrentFolder(bookmark)) renderBookmarkTree();
 }
 
 const onBookmarkChanged = async (id) => {
+  renderFolderTreeIfIsFolder(id);
+
   // Re-render bookmark tree if current folder is the changed bookmark's ancestor
   if (isInCurrentFolder((await browser.bookmarks.get(id))[0])) renderBookmarkTree();
 }
 
 const onBookmarkMoved = async (id, {parentId, oldParentId}) => {
+  renderFolderTreeIfIsFolder(id);
+
   // Re-render bookmark tree if current folder is the moved bookmark's ancestor
   if (
     isInCurrentFolder((await browser.bookmarks.get(parentId))[0]) ||
     isInCurrentFolder((await browser.bookmarks.get(oldParentId))[0])
   ) renderBookmarkTree();
+};
+
+const renderFolderTreeIfIsFolder = async (bookmarkOrId) => {
+  const bookmark = (typeof bookmarkOrId === 'string') ?
+    (await browser.bookmarks.get(bookmarkOrId))[0] : bookmarkOrId;
+  if (getBmtnType(bookmark) === 'folder') renderFolderTree();
 };
 
 /**
