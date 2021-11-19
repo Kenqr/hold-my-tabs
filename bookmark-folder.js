@@ -5,33 +5,37 @@ const init = async () => {
   window.addEventListener('hashchange', renderBookmarkTree);
 
   // Click .folder-tree-toggle to toggle #folderTreeDiv
-  document.querySelector('.folder-tree-toggle').addEventListener('click', () => {
-    document.querySelector('#folderTreeDiv').classList.toggle('hidden');
+  $('.folder-tree-toggle').addEventListener('click', () => {
+    $('#folderTreeDiv').classList.toggle('hidden');
   });
 
   // Show folder tree if no folder is selected
   if (!location.hash) {
-    document.querySelector('#folderTreeDiv').classList.remove('hidden');
+    $('#folderTreeDiv').classList.remove('hidden');
   }
 
   // Auto update bookmark tree
   browser.bookmarks.onCreated.addListener(onBookmarkCreated);
+  browser.bookmarks.onRemoved.addListener(onBookmarkRemoved);
+  browser.bookmarks.onChanged.addListener(onBookmarkChanged);
+  browser.bookmarks.onMoved.addListener(onBookmarkMoved);
 };
 
 const renderFolderTree = async () => {
+  $('#folderTree').innerHTML = '';
   const rootNode = (await browser.bookmarks.getTree())[0];
   const rootFolderTree = createBookmarkTree(rootNode, true);
-  document.querySelector('#folderTree').appendChild(rootFolderTree);
+  $('#folderTree').appendChild(rootFolderTree);
 };
 
 const renderBookmarkTree = async () => {
-  document.querySelector('#bookmarkTree').innerHTML = '';
+  $('#bookmarkTree').innerHTML = '';
   const folderId = getCurrentFolderId();
   const subTree = (await browser.bookmarks.getSubTree(folderId))[0];
-  document.querySelector('#folderTitle').textContent = subTree.title;
-  document.title = subTree.title + ' - Hold My Tabs';
+  $('#folderTitle').textContent = subTree.title;
+  document.title = subTree.title + ' - HMT';
   const bookmarkTree = createBookmarkTree(subTree);
-  document.querySelector('#bookmarkTree').appendChild(bookmarkTree);
+  $('#bookmarkTree').appendChild(bookmarkTree);
 };
 
 const createBookmarkTree = (node, folderOnly = false) => {
@@ -179,7 +183,7 @@ const deleteBookmarkButtonEventHandler = async (event) => {
   // Get list item and bookmark id
   const bmti = event.target.closest('.bmti');
   const bookmarkId = bmti.dataset.bookmarkId;
-  const node = (await browser.bookmarks.get(bookmarkId))[0];
+  const node = await getNode(bookmarkId);
   const nodeType = getBmtnType(node);
 
   // Confirm deletion
@@ -203,7 +207,7 @@ const openAndDeleteBookmarkButtonEventHandler = async (event) => {
   // Get list item and bookmark id
   const bmti = event.target.closest('.bmti');
   const bookmarkId = bmti.dataset.bookmarkId;
-  const bookmark = (await browser.bookmarks.get(bookmarkId))[0];
+  const bookmark = await getNode(bookmarkId);
 
   // Open url in a new tab
   browser.tabs.create({
@@ -219,7 +223,7 @@ const renameBookmarkButtonEventHandler = async (event) => {
   // Get list item and bookmark id
   const bmti = event.target.closest('.bmti');
   const bookmarkId = bmti.dataset.bookmarkId;
-  const bookmarkTreeNode = (await(browser.bookmarks.get(bookmarkId)))[0];
+  const bookmarkTreeNode = await getNode(bookmarkId);
 
   const newTitle = prompt('Rename bookmark to:', bookmarkTreeNode.title);
   if (newTitle !== null) {
@@ -234,23 +238,69 @@ const renameBookmarkButtonEventHandler = async (event) => {
 };
 
 const getFavicon = (url) => {
-  // Use domain name to get favicon from Google S2
-  const anchor = document.createElement('a');
-  anchor.href = url;
-  return 'http://www.google.com/s2/favicons?domain=' + anchor.hostname;
+  const protocol = (new URL(url)).protocol;
+  // Use domain name to get favicon from Google S2 for https and http
+  if (protocol === 'https:' || protocol === 'http:') {
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    return 'https://www.google.com/s2/favicons?domain=' + anchor.hostname;
+  }
+
+  // No favicon for other protocols
+  return '';
+};
+
+/**
+ * Decides if bookmark is in current folder
+ * 
+ * @param {bookmarks.BookmarkTreeNode} bookmark - The bookmark tree node.
+ * @returns {boolean} Whether bookmark is in current folder or not.
+ */
+ const isInCurrentFolder = async (bookmark) => {
+  const folderId = getCurrentFolderId();
+
+  for (let b = bookmark; ; b = await getNode(b.parentId)) {
+    if (b.id === folderId) return true;
+    if (!b.parentId) break;
+  }
+
+  return false;
 };
 
 const onBookmarkCreated = async (id, bookmark) => {
-  const folderId = getCurrentFolderId();
+  renderFolderTreeIfIsFolder(id);
 
   // Re-render bookmark tree if current folder is the new bookmark's ancestor
-  while (bookmark.parentId) {
-    bookmark = (await browser.bookmarks.get(bookmark.parentId))[0];
-    if (bookmark.id === folderId) {
-      renderBookmarkTree();
-      return;
-    }
-  }
+  if (isInCurrentFolder(bookmark)) renderBookmarkTree();
+};
+
+const onBookmarkRemoved = async (id, {node: bookmark}) => {
+  renderFolderTreeIfIsFolder(bookmark);
+
+  // Re-render bookmark tree if current folder is the removed bookmark's ancestor
+  if (isInCurrentFolder(bookmark)) renderBookmarkTree();
+}
+
+const onBookmarkChanged = async (id) => {
+  renderFolderTreeIfIsFolder(id);
+
+  // Re-render bookmark tree if current folder is the changed bookmark's ancestor
+  if (isInCurrentFolder(await getNode(id))) renderBookmarkTree();
+}
+
+const onBookmarkMoved = async (id, {parentId, oldParentId}) => {
+  renderFolderTreeIfIsFolder(id);
+
+  // Re-render bookmark tree if current folder is the moved bookmark's ancestor
+  if (
+    isInCurrentFolder(await getNode(parentId)) ||
+    isInCurrentFolder(await getNode(oldParentId))
+  ) renderBookmarkTree();
+};
+
+const renderFolderTreeIfIsFolder = async (bookmarkOrId) => {
+  const bookmark = (typeof bookmarkOrId === 'string') ? await getNode(bookmarkOrId) : bookmarkOrId;
+  if (getBmtnType(bookmark) === 'folder') renderFolderTree();
 };
 
 /**
@@ -276,5 +326,12 @@ const getBmtnType = (node) => {
     return node.url ? 'bookmark' : 'folder';
   }
 };
+
+const getNode = async (bmId) => {
+  return (await browser.bookmarks.get(bmId))[0];
+};
+
+//alias for document.querySelector
+const $ = (...args) => document.querySelector(...args);
 
 init();
