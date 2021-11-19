@@ -33,7 +33,7 @@ const renderBookmarkTree = async () => {
   const folderId = getCurrentFolderId();
   const subTree = (await browser.bookmarks.getSubTree(folderId))[0];
   $('#folderTitle').textContent = subTree.title;
-  document.title = subTree.title + ' - Hold My Tabs';
+  document.title = subTree.title + ' - HMT';
   const bookmarkTree = createBookmarkTree(subTree);
   $('#bookmarkTree').appendChild(bookmarkTree);
 };
