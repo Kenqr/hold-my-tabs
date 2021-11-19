@@ -5,13 +5,13 @@ const init = async () => {
   window.addEventListener('hashchange', renderBookmarkTree);
 
   // Click .folder-tree-toggle to toggle #folderTreeDiv
-  document.querySelector('.folder-tree-toggle').addEventListener('click', () => {
-    document.querySelector('#folderTreeDiv').classList.toggle('hidden');
+  $('.folder-tree-toggle').addEventListener('click', () => {
+    $('#folderTreeDiv').classList.toggle('hidden');
   });
 
   // Show folder tree if no folder is selected
   if (!location.hash) {
-    document.querySelector('#folderTreeDiv').classList.remove('hidden');
+    $('#folderTreeDiv').classList.remove('hidden');
   }
 
   // Auto update bookmark tree
@@ -22,20 +22,20 @@ const init = async () => {
 };
 
 const renderFolderTree = async () => {
-  document.querySelector('#folderTree').innerHTML = '';
+  $('#folderTree').innerHTML = '';
   const rootNode = (await browser.bookmarks.getTree())[0];
   const rootFolderTree = createBookmarkTree(rootNode, true);
-  document.querySelector('#folderTree').appendChild(rootFolderTree);
+  $('#folderTree').appendChild(rootFolderTree);
 };
 
 const renderBookmarkTree = async () => {
-  document.querySelector('#bookmarkTree').innerHTML = '';
+  $('#bookmarkTree').innerHTML = '';
   const folderId = getCurrentFolderId();
   const subTree = (await browser.bookmarks.getSubTree(folderId))[0];
-  document.querySelector('#folderTitle').textContent = subTree.title;
+  $('#folderTitle').textContent = subTree.title;
   document.title = subTree.title + ' - Hold My Tabs';
   const bookmarkTree = createBookmarkTree(subTree);
-  document.querySelector('#bookmarkTree').appendChild(bookmarkTree);
+  $('#bookmarkTree').appendChild(bookmarkTree);
 };
 
 const createBookmarkTree = (node, folderOnly = false) => {
@@ -330,5 +330,8 @@ const getBmtnType = (node) => {
 const getNode = async (bmId) => {
   return (await browser.bookmarks.get(bmId))[0];
 };
+
+//alias for document.querySelector
+const $ = (...args) => document.querySelector(...args);
 
 init();
