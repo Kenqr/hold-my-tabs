@@ -243,7 +243,7 @@ const getFavicon = (url) => {
   if (protocol === 'https:' || protocol === 'http:') {
     const anchor = document.createElement('a');
     anchor.href = url;
-    return 'http://www.google.com/s2/favicons?domain=' + anchor.hostname;
+    return 'https://www.google.com/s2/favicons?domain=' + anchor.hostname;
   }
 
   // No favicon for other protocols
