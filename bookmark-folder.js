@@ -183,7 +183,7 @@ const deleteBookmarkButtonEventHandler = async (event) => {
   // Get list item and bookmark id
   const bmti = event.target.closest('.bmti');
   const bookmarkId = bmti.dataset.bookmarkId;
-  const node = (await browser.bookmarks.get(bookmarkId))[0];
+  const node = await getNode(bookmarkId);
   const nodeType = getBmtnType(node);
 
   // Confirm deletion
@@ -207,7 +207,7 @@ const openAndDeleteBookmarkButtonEventHandler = async (event) => {
   // Get list item and bookmark id
   const bmti = event.target.closest('.bmti');
   const bookmarkId = bmti.dataset.bookmarkId;
-  const bookmark = (await browser.bookmarks.get(bookmarkId))[0];
+  const bookmark = await getNode(bookmarkId);
 
   // Open url in a new tab
   browser.tabs.create({
@@ -223,7 +223,7 @@ const renameBookmarkButtonEventHandler = async (event) => {
   // Get list item and bookmark id
   const bmti = event.target.closest('.bmti');
   const bookmarkId = bmti.dataset.bookmarkId;
-  const bookmarkTreeNode = (await(browser.bookmarks.get(bookmarkId)))[0];
+  const bookmarkTreeNode = await getNode(bookmarkId);
 
   const newTitle = prompt('Rename bookmark to:', bookmarkTreeNode.title);
   if (newTitle !== null) {
@@ -259,7 +259,7 @@ const getFavicon = (url) => {
  const isInCurrentFolder = async (bookmark) => {
   const folderId = getCurrentFolderId();
 
-  for (let b = bookmark; ; b = (await browser.bookmarks.get(b.parentId))[0]) {
+  for (let b = bookmark; ; b = await getNode(b.parentId)) {
     if (b.id === folderId) return true;
     if (!b.parentId) break;
   }
@@ -285,7 +285,7 @@ const onBookmarkChanged = async (id) => {
   renderFolderTreeIfIsFolder(id);
 
   // Re-render bookmark tree if current folder is the changed bookmark's ancestor
-  if (isInCurrentFolder((await browser.bookmarks.get(id))[0])) renderBookmarkTree();
+  if (isInCurrentFolder(await getNode(id))) renderBookmarkTree();
 }
 
 const onBookmarkMoved = async (id, {parentId, oldParentId}) => {
@@ -293,14 +293,13 @@ const onBookmarkMoved = async (id, {parentId, oldParentId}) => {
 
   // Re-render bookmark tree if current folder is the moved bookmark's ancestor
   if (
-    isInCurrentFolder((await browser.bookmarks.get(parentId))[0]) ||
-    isInCurrentFolder((await browser.bookmarks.get(oldParentId))[0])
+    isInCurrentFolder(await getNode(parentId)) ||
+    isInCurrentFolder(await getNode(oldParentId))
   ) renderBookmarkTree();
 };
 
 const renderFolderTreeIfIsFolder = async (bookmarkOrId) => {
-  const bookmark = (typeof bookmarkOrId === 'string') ?
-    (await browser.bookmarks.get(bookmarkOrId))[0] : bookmarkOrId;
+  const bookmark = (typeof bookmarkOrId === 'string') ? await getNode(bookmarkOrId) : bookmarkOrId;
   if (getBmtnType(bookmark) === 'folder') renderFolderTree();
 };
 
@@ -326,6 +325,10 @@ const getBmtnType = (node) => {
   } else {
     return node.url ? 'bookmark' : 'folder';
   }
+};
+
+const getNode = async (bmId) => {
+  return (await browser.bookmarks.get(bmId))[0];
 };
 
 init();
