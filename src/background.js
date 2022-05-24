@@ -29,8 +29,14 @@ const init = () => {
     contexts: ['all', 'tab'],
   });
 
+  browser.menus.create({
+    id: 'open-as-hmt-page',
+    title: 'Open as HMT Page',
+    contexts: ['bookmark'],
+  });
+
   browser.menus.onClicked.addListener(async (info, tab) => {
-    const hmtTab = await findClosestHmtTabOnLeft(tab.index);
+    const hmtTab = tab ? await findClosestHmtTabOnLeft(tab.index) : null;
 
     try {
       switch (info.menuItemId) {
@@ -57,7 +63,12 @@ const init = () => {
         }
         case 'open-hmt-page': {
           // Open extension page previous to current tab
-          openHmtPage(tab.index);
+          await openHmtPage({index: tab.index});
+          break;
+        }
+        case 'open-as-hmt-page': {
+          // Open selected bookmark in HMT
+          await openHmtPage({bookmarkId: info.bookmarkId});
           break;
         }
       }
@@ -66,7 +77,7 @@ const init = () => {
     }
   });
 
-  browser.browserAction.onClicked.addListener(async (tab, onClickData) => {
+  browser.browserAction.onClicked.addListener(async (tab) => {
     try {
       const hmtTab = await findClosestHmtTabOnLeft(tab.index);
       if (!hmtTab) throw 'HMT tab does not exist.';
@@ -75,16 +86,28 @@ const init = () => {
       await browser.tabs.remove(tab.id); // Close the tab
     } catch (e) {
       // Open extension page previous to current tab
-      openHmtPage(tab.index);
+      await openHmtPage({index: tab.index});
     }
   });
 };
 
-const openHmtPage = (index) => {
+const openHmtPage = async ({index, bookmarkId} = {}) => {
+  const bookmarkFolderId = bookmarkId ? (await getClosestFolderId(bookmarkId)) : '';
+
   return browser.tabs.create({
-    url: '/bookmark-folder.html',
+    url: `/bookmark-folder.html#${bookmarkFolderId}`,
     index: index,
   });
+};
+
+/**
+ * Get id of closest folder from this bookmark
+ * @param {string} bookmarkId - Id of this bookmark
+ * @returns {string} - bookmarkId if this bookmark is a folder, otherwise parent id
+ */
+const getClosestFolderId = async (bookmarkId) => {
+  const bookmarks = await browser.bookmarks.get(bookmarkId);
+  return bookmarks[0].url ? bookmarks[0].parentId : bookmarkId;
 };
 
 const findClosestHmtTabOnLeft = async (currentTabIndex) => {

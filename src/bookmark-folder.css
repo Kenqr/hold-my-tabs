@@ -17,6 +17,7 @@ html, body {
     display: flex;
     background: hsl(0, 0%, 95%);
     font-size: 1.5em;
+    font-family: sans-serif;
 }
 
 .main__partition {
