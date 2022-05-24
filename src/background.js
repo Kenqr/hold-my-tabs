@@ -29,8 +29,14 @@ const init = () => {
     contexts: ['all', 'tab'],
   });
 
+  browser.menus.create({
+    id: 'open-as-hmt-page',
+    title: 'Open as HMT Page',
+    contexts: ['bookmark'],
+  });
+
   browser.menus.onClicked.addListener(async (info, tab) => {
-    const hmtTab = await findClosestHmtTabOnLeft(tab.index);
+    const hmtTab = tab ? await findClosestHmtTabOnLeft(tab.index) : null;
 
     try {
       switch (info.menuItemId) {
@@ -58,6 +64,11 @@ const init = () => {
         case 'open-hmt-page': {
           // Open extension page previous to current tab
           await openHmtPage({index: tab.index});
+          break;
+        }
+        case 'open-as-hmt-page': {
+          // Open selected bookmark in HMT
+          await openHmtPage({bookmarkId: info.bookmarkId});
           break;
         }
       }
