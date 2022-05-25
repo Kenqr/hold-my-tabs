@@ -221,7 +221,7 @@ browser.menus.onClicked.addListener(async (info, tab) => {
   }
 });
 
-browser.browserAction.onClicked.addListener(async (tab) => {
+browser.pageAction.onClicked.addListener(async (tab) => {
   try {
     const hmtTab = await findClosestHmtTabOnLeft(tab.index);
     if (!hmtTab) throw 'HMT tab does not exist.';
