@@ -8,6 +8,12 @@
         "128": "icons/logo-128.png"
     },
 
+    "browser_specific_settings": {
+        "gecko": {
+            "strict_min_version": "74.0"
+        }
+    },
+
     "permissions": [
         "bookmarks",
         "tabs",
