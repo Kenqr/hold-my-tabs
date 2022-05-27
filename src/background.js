@@ -177,6 +177,12 @@ browser.menus.create({
   contexts: ['bookmark'],
 });
 
+browser.menus.create({
+  id: 'add-to-collection',
+  title: 'Add to collection',
+  contexts: ['bookmark'],
+});
+
 
 // Create event listeners
 browser.menus.onClicked.addListener(async (info, tab) => {
@@ -213,6 +219,14 @@ browser.menus.onClicked.addListener(async (info, tab) => {
       case 'open-as-hmt-page': {
         // Open selected bookmark in HMT
         await openHmtPage({bookmarkId: info.bookmarkId});
+        break;
+      }
+      case 'add-to-collection': {
+        const {collection = []} = await browser.storage.local.get('collection');
+        if (collection.includes(info.bookmarkId)) break;
+
+        collection.push(info.bookmarkId);
+        await browser.storage.local.set({ collection });
         break;
       }
     }
