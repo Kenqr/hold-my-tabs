@@ -222,11 +222,18 @@ browser.menus.onClicked.addListener(async (info, tab) => {
         break;
       }
       case 'add-to-collection': {
-        const {collection = []} = await browser.storage.local.get('collection');
-        if (collection.includes(info.bookmarkId)) break;
+        try {
+          const bookmarks = await browser.bookmarks.get(info.bookmarkId);
+          if (bookmarks[0].type === 'separator') throw 'Cannot add separators';
 
-        collection.push(info.bookmarkId);
-        await browser.storage.local.set({ collection });
+          const {collection = []} = await browser.storage.local.get('collection');
+          if (collection.includes(info.bookmarkId)) throw 'Already in collection';
+
+          collection.push(info.bookmarkId);
+          await browser.storage.local.set({ collection });
+        } catch (e) {
+          console.log(e);
+        }
         break;
       }
     }
