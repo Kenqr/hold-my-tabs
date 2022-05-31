@@ -232,7 +232,7 @@ browser.menus.onClicked.addListener(async (info, tab) => {
           collection.push(info.bookmarkId);
           await browser.storage.local.set({ collection });
         } catch (e) {
-          console.log(e);
+          console.warn(e);
         }
         break;
       }

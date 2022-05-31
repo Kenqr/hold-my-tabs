@@ -14,5 +14,6 @@ module.exports = {
   },
   rules: {
     'no-var': 'error',
+    'no-console': ['warn', {allow: ['warn', 'error']}],
   },
 };
