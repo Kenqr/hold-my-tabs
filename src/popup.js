@@ -1,22 +1,51 @@
 import {$, $create, asyncFilter} from './helper.js';
 
 const init = async () => {
+  // Create elements for the popup
   const collection = await getCollection();
   collection.forEach(bookmark => {
-    $('#collection').append($create(['a', {
+    $('#collection').append($create([
+      'div', {
+        class: 'bookmark',
+        'data-bookmark-id': bookmark.id,
+      },
+      ['a', {
+        class: 'bookmark__remove',
+        style: 'cursor: pointer;',
+      }, '❌'],
+      ['a', {
         // If there is no url property, it is a folder
         href: bookmark.url ?? browser.runtime.getURL(`bookmark-folder.html#${bookmark.id}`),
         target: '_blank',
-        class: 'bookmark',
-      }, bookmark.title
+        class: 'bookmark__title',
+      }, bookmark.title],
     ]));
   });
 
-  // Close the popup after clicking a bookmark
-  document.querySelectorAll('.bookmark').forEach(elem => {
-    elem.addEventListener('click', () => {
-      setTimeout(() => window.close(), 1);
-    });
+  // Remove the bookmark from the collection when the cross symbol is clicked
+  const removeBookmarkHandler = async (event) => {
+    const bmElem = event.currentTarget.closest('.bookmark');
+    const bmId = bmElem.dataset.bookmarkId;
+
+    // Remove the bookmark element from the popup
+    bmElem.remove();
+
+    // Remove the bookmark from the collection
+    const {collection = []} = await browser.storage.local.get('collection');
+    const index = collection.indexOf(bmId);
+    collection.splice(index, 1);
+    await browser.storage.local.set({ collection });
+  };
+  document.querySelectorAll('.bookmark__remove').forEach(elem => {
+    elem.addEventListener('click', removeBookmarkHandler);
+  });
+
+  // Close the popup after clicking any bookmark
+  const closePopupHandler = () => {
+    setTimeout(() => window.close(), 1);
+  };
+  document.querySelectorAll('.bookmark__title').forEach(elem => {
+    elem.addEventListener('click', closePopupHandler);
   });
 };
 
