@@ -17,7 +17,7 @@ const init = async () => {
         // If there is no url property, it is a folder
         href: bookmark.url ?? browser.runtime.getURL(`bookmark-folder.html#${bookmark.id}`),
         target: '_blank',
-        class: 'bookmark__title',
+        class: `bookmark__title ${bookmark.url ? 'bookmark__title--url' : 'bookmark__title--folder'}`,
       }, bookmark.title],
     ]));
   });
