@@ -25,3 +25,12 @@ export const $create = ([tag, attrs = {}, ...children]) => {
 
   return elem;
 };
+
+export const asyncMap = async (array, callback) => {
+  return Promise.all(array.map(callback));
+}
+
+export const asyncFilter = async (array, callback) => {
+  const filterMap = await asyncMap(array, callback);
+  return array.filter((value, index) => filterMap[index]);
+}
