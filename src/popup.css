@@ -1,0 +1,47 @@
+html {
+  box-sizing: border-box;
+  font-family: sans-serif;
+}
+*, *::before, *::after {
+  box-sizing: inherit;
+}
+
+body {
+  min-width: 300px;
+  min-height: 250px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding: 10px;
+}
+
+.bookmark {
+  margin: 5px;
+  display: block;
+}
+.bookmark > * {
+  padding: 0 5px;
+}
+
+.bookmark__remove {
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.bookmark:hover .bookmark__remove {
+  opacity: 1;
+}
+
+.bookmark__title {
+  text-decoration: none;
+}
+.bookmark__title--folder::before {
+  content: '📁';
+}
+.bookmark__title--folder:is(:link, :visited) {
+  color: hsl(230, 100%, 50%);
+}
+.bookmark__title--url::before {
+  content: '🔖';
+}
+.bookmark__title--url:is(:link, :visited) {
+  color: hsl(120, 100%, 25%);
+}

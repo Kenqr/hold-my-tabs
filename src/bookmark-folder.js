@@ -1,3 +1,5 @@
+import {$} from './helper.js';
+
 const init = async () => {
   renderFolderTree();
 
@@ -330,8 +332,5 @@ const getBmtnType = (node) => {
 const getNode = async (bmId) => {
   return (await browser.bookmarks.get(bmId))[0];
 };
-
-//alias for document.querySelector
-const $ = (...args) => document.querySelector(...args);
 
 init();

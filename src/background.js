@@ -1,96 +1,3 @@
-const init = () => {
-  browser.menus.create({
-    id: 'move-to-folder',
-    title: 'Move to Folder',
-    contexts: ['all', 'tab'],
-  });
-
-  browser.menus.create({
-    id: 'copy-to-folder',
-    title: 'Copy to Folder',
-    contexts: ['all', 'tab'],
-  });
-
-  browser.menus.create({
-    id: 'move-tabs-to-folder',
-    title: 'Move Tabs to Folder',
-    contexts: ['all', 'tab'],
-  });
-
-  browser.menus.create({
-    id: 'copy-tabs-to-folder',
-    title: 'Copy Tabs to Folder',
-    contexts: ['all', 'tab'],
-  });
-
-  browser.menus.create({
-    id: 'open-hmt-page',
-    title: 'Open HMT Page',
-    contexts: ['all', 'tab'],
-  });
-
-  browser.menus.create({
-    id: 'open-as-hmt-page',
-    title: 'Open as HMT Page',
-    contexts: ['bookmark'],
-  });
-
-  browser.menus.onClicked.addListener(async (info, tab) => {
-    const hmtTab = tab ? await findClosestHmtTabOnLeft(tab.index) : null;
-
-    try {
-      switch (info.menuItemId) {
-        case 'move-to-folder': {
-          if (!hmtTab) throw 'HMT tab does not exist.';
-          await copyTabToHmtTab(tab, hmtTab);
-          await browser.tabs.remove(tab.id); // Close the tab
-          break;
-        }
-        case 'copy-to-folder': {
-          if (!hmtTab) throw 'HMT tab does not exist.';
-          await copyTabToHmtTab(tab, hmtTab);
-          break;
-        }
-        case 'move-tabs-to-folder': {
-          if (!hmtTab) throw 'HMT tab does not exist.';
-          await menuMoveTabsToFolder(tab, hmtTab);
-          break;
-        }
-        case 'copy-tabs-to-folder': {
-          if (!hmtTab) throw 'HMT tab does not exist.';
-          await menuCopyTabsToFolder(tab, hmtTab);
-          break;
-        }
-        case 'open-hmt-page': {
-          // Open extension page previous to current tab
-          await openHmtPage({index: tab.index});
-          break;
-        }
-        case 'open-as-hmt-page': {
-          // Open selected bookmark in HMT
-          await openHmtPage({bookmarkId: info.bookmarkId});
-          break;
-        }
-      }
-    } catch (e) {
-      // Do nothing
-    }
-  });
-
-  browser.browserAction.onClicked.addListener(async (tab) => {
-    try {
-      const hmtTab = await findClosestHmtTabOnLeft(tab.index);
-      if (!hmtTab) throw 'HMT tab does not exist.';
-    
-      await copyTabToHmtTab(tab, hmtTab);
-      await browser.tabs.remove(tab.id); // Close the tab
-    } catch (e) {
-      // Open extension page previous to current tab
-      await openHmtPage({index: tab.index});
-    }
-  });
-};
-
 const openHmtPage = async ({index, bookmarkId} = {}) => {
   const bookmarkFolderId = bookmarkId ? (await getClosestFolderId(bookmarkId)) : '';
 
@@ -232,4 +139,118 @@ const menuCopyTabsToFolder = async (tab, hmtTab) => {
   return tabsCopied;
 };
 
-init();
+
+// Create menu items
+browser.menus.create({
+  id: 'move-to-folder',
+  title: 'Move to Folder',
+  contexts: ['all', 'tab'],
+});
+
+browser.menus.create({
+  id: 'copy-to-folder',
+  title: 'Copy to Folder',
+  contexts: ['all', 'tab'],
+});
+
+browser.menus.create({
+  id: 'move-tabs-to-folder',
+  title: 'Move Tabs to Folder',
+  contexts: ['all', 'tab'],
+});
+
+browser.menus.create({
+  id: 'copy-tabs-to-folder',
+  title: 'Copy Tabs to Folder',
+  contexts: ['all', 'tab'],
+});
+
+browser.menus.create({
+  id: 'open-hmt-page',
+  title: 'Open HMT Page',
+  contexts: ['all', 'tab'],
+});
+
+browser.menus.create({
+  id: 'open-as-hmt-page',
+  title: 'Open as HMT Page',
+  contexts: ['bookmark'],
+});
+
+browser.menus.create({
+  id: 'add-to-collection',
+  title: 'Add to collection',
+  contexts: ['bookmark'],
+});
+
+
+// Create event listeners
+browser.menus.onClicked.addListener(async (info, tab) => {
+  const hmtTab = tab ? await findClosestHmtTabOnLeft(tab.index) : null;
+
+  try {
+    switch (info.menuItemId) {
+      case 'move-to-folder': {
+        if (!hmtTab) throw 'HMT tab does not exist.';
+        await copyTabToHmtTab(tab, hmtTab);
+        await browser.tabs.remove(tab.id); // Close the tab
+        break;
+      }
+      case 'copy-to-folder': {
+        if (!hmtTab) throw 'HMT tab does not exist.';
+        await copyTabToHmtTab(tab, hmtTab);
+        break;
+      }
+      case 'move-tabs-to-folder': {
+        if (!hmtTab) throw 'HMT tab does not exist.';
+        await menuMoveTabsToFolder(tab, hmtTab);
+        break;
+      }
+      case 'copy-tabs-to-folder': {
+        if (!hmtTab) throw 'HMT tab does not exist.';
+        await menuCopyTabsToFolder(tab, hmtTab);
+        break;
+      }
+      case 'open-hmt-page': {
+        // Open extension page previous to current tab
+        await openHmtPage({index: tab.index});
+        break;
+      }
+      case 'open-as-hmt-page': {
+        // Open selected bookmark in HMT
+        await openHmtPage({bookmarkId: info.bookmarkId});
+        break;
+      }
+      case 'add-to-collection': {
+        try {
+          const bookmarks = await browser.bookmarks.get(info.bookmarkId);
+          if (bookmarks[0].type === 'separator') throw 'Cannot add separators';
+
+          const {collection = []} = await browser.storage.local.get('collection');
+          if (collection.includes(info.bookmarkId)) throw 'Already in collection';
+
+          collection.push(info.bookmarkId);
+          await browser.storage.local.set({ collection });
+        } catch (e) {
+          console.warn(e);
+        }
+        break;
+      }
+    }
+  } catch (e) {
+    // Do nothing
+  }
+});
+
+browser.pageAction.onClicked.addListener(async (tab) => {
+  try {
+    const hmtTab = await findClosestHmtTabOnLeft(tab.index);
+    if (!hmtTab) throw 'HMT tab does not exist.';
+  
+    await copyTabToHmtTab(tab, hmtTab);
+    await browser.tabs.remove(tab.id); // Close the tab
+  } catch (e) {
+    // Open extension page previous to current tab
+    await openHmtPage({index: tab.index});
+  }
+});
