@@ -1,6 +1,12 @@
-import {$, $create, asyncFilter} from './helper.js';
+import {$, $$, $create, asyncFilter} from './helper.js';
 
 const init = async () => {
+  refreshCollectionView();
+};
+
+const refreshCollectionView = async () => {
+  $('#collection').textContent = '';
+
   // Create elements for the popup
   const collection = await getCollection();
   collection.forEach(bookmark => {
@@ -39,6 +45,39 @@ const init = async () => {
   document.querySelectorAll('.bookmark__remove').forEach(elem => {
     elem.addEventListener('click', removeBookmarkHandler);
   });
+
+  // Allow drag and drop
+  (() => {
+    const onDragStart = (ev) => {
+      const bm = ev.target.closest('div.bookmark');
+      ev.dataTransfer.setData('text/plain', bm.dataset.bookmarkId);
+    };
+    const onDragOver = (ev) => {
+      ev.preventDefault();
+      ev.dataTransfer.dropEffect = 'move';
+    };
+    const onDrop = async (ev) => {
+      ev.preventDefault();
+      const from = ev.dataTransfer.getData('text/plain');
+      const to = ev.target.closest('div.bookmark').dataset.bookmarkId;
+
+      // Remove the bookmark from the collection
+      const {collection = []} = await browser.storage.local.get('collection');
+      const fromIndex = collection.indexOf(from);
+      const toIndex = collection.indexOf(to);
+      collection.splice(fromIndex, 1);
+      collection.splice(toIndex, 0, from);
+      await browser.storage.local.set({ collection });
+      refreshCollectionView();
+    };
+
+    $$('.bookmark__title').forEach(bmTitle => {
+      bmTitle.setAttribute('draggable', 'true');
+      bmTitle.addEventListener('dragstart', onDragStart);
+      bmTitle.addEventListener('dragover', onDragOver);
+      bmTitle.addEventListener('drop', onDrop);
+    })
+  })();
 
   // Close the popup after clicking any bookmark
   const closePopupHandler = () => {

@@ -1,5 +1,6 @@
 // Alias for document.querySelector
 export const $ = (...args) => document.querySelector(...args);
+export const $$ = (...args) => document.querySelectorAll(...args);
 
 /**
  * Create a new element

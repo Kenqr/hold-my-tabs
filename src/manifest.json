@@ -1,7 +1,7 @@
 {
     "manifest_version": 2,
     "name": "Hold My Tabs",
-    "version": "1.0",
+    "version": "1.1",
 
     "description": "Move tabs into and out of a bookmark folder.",
     "icons": {
@@ -10,6 +10,7 @@
 
     "browser_specific_settings": {
         "gecko": {
+            "id": "{6f0dcc44-d69d-49d8-ab36-373756a9c986}",
             "strict_min_version": "79.0"
         }
     },

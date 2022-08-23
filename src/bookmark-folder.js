@@ -40,6 +40,22 @@ const renderBookmarkTree = async () => {
   $('#bookmarkTree').appendChild(bookmarkTree);
 };
 
+const onDragStart = (ev) => {
+  const li = ev.target.closest('li.bmti');
+  ev.dataTransfer.setData('text/plain', li.dataset.bookmarkId);
+};
+const onDragOver = (ev) => {
+  ev.preventDefault();
+  ev.dataTransfer.dropEffect = 'move';
+};
+const onDrop = async (ev) => {
+  ev.preventDefault();
+  const from = ev.dataTransfer.getData('text/plain');
+  const to = ev.target.closest('li.bmti').dataset.bookmarkId;
+  const toBmtn = (await browser.bookmarks.get(to))[0];
+  browser.bookmarks.move(from, {index: toBmtn.index})
+};
+
 const createBookmarkTree = (node, folderOnly = false) => {
   const ul = document.createElement('ul');
   ul.classList.add('bookmark-folder-content');
@@ -58,6 +74,14 @@ const createBookmarkTree = (node, folderOnly = false) => {
     const buttonSet = document.createElement('div');
     buttonSet.classList.add('bmtn__button-set');
     bmtn.appendChild(buttonSet);
+
+    // Drag and Drop
+    if (!folderOnly) {
+      li.setAttribute('draggable', 'true');
+      li.addEventListener('dragstart', onDragStart);
+      li.addEventListener('dragover', onDragOver);
+      li.addEventListener('drop', onDrop);
+    }
 
     switch (getBmtnType(child)) {
       case 'separator': {
