@@ -141,46 +141,48 @@ const menuCopyTabsToFolder = async (tab, hmtTab) => {
 
 
 // Create menu items
-browser.menus.create({
-  id: 'move-to-folder',
-  title: 'Move to Folder',
-  contexts: ['all', 'tab'],
-});
+browser.runtime.onInstalled.addListener(() => {
+  browser.menus.create({
+    id: 'move-to-folder',
+    title: 'Move to Folder',
+    contexts: ['all', 'tab'],
+  });
 
-browser.menus.create({
-  id: 'copy-to-folder',
-  title: 'Copy to Folder',
-  contexts: ['all', 'tab'],
-});
+  browser.menus.create({
+    id: 'copy-to-folder',
+    title: 'Copy to Folder',
+    contexts: ['all', 'tab'],
+  });
 
-browser.menus.create({
-  id: 'move-tabs-to-folder',
-  title: 'Move Tabs to Folder',
-  contexts: ['all', 'tab'],
-});
+  browser.menus.create({
+    id: 'move-tabs-to-folder',
+    title: 'Move Tabs to Folder',
+    contexts: ['all', 'tab'],
+  });
 
-browser.menus.create({
-  id: 'copy-tabs-to-folder',
-  title: 'Copy Tabs to Folder',
-  contexts: ['all', 'tab'],
-});
+  browser.menus.create({
+    id: 'copy-tabs-to-folder',
+    title: 'Copy Tabs to Folder',
+    contexts: ['all', 'tab'],
+  });
 
-browser.menus.create({
-  id: 'open-hmt-page',
-  title: 'Open HMT Page',
-  contexts: ['all', 'tab'],
-});
+  browser.menus.create({
+    id: 'open-hmt-page',
+    title: 'Open HMT Page',
+    contexts: ['all', 'tab'],
+  });
 
-browser.menus.create({
-  id: 'open-as-hmt-page',
-  title: 'Open as HMT Page',
-  contexts: ['bookmark'],
-});
+  browser.menus.create({
+    id: 'open-as-hmt-page',
+    title: 'Open as HMT Page',
+    contexts: ['bookmark'],
+  });
 
-browser.menus.create({
-  id: 'add-to-collection',
-  title: 'Add to collection',
-  contexts: ['bookmark'],
+  browser.menus.create({
+    id: 'add-to-collection',
+    title: 'Add to collection',
+    contexts: ['bookmark'],
+  });
 });
 
 
