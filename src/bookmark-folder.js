@@ -31,12 +31,12 @@ const renderFolderTree = async () => {
 };
 
 const renderBookmarkTree = async () => {
-  $('#bookmarkTree').innerHTML = '';
   const folderId = getCurrentFolderId();
   const subTree = (await browser.bookmarks.getSubTree(folderId))[0];
-  $('#folderTitle').textContent = subTree.title;
-  document.title = subTree.title + ' - HMT';
   const bookmarkTree = createBookmarkTree(subTree);
+  document.title = subTree.title + ' - HMT';
+  $('#folderTitle').textContent = subTree.title;
+  $('#bookmarkTree').innerHTML = '';
   $('#bookmarkTree').appendChild(bookmarkTree);
 };
 
