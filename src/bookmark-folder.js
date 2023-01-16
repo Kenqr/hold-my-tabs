@@ -51,9 +51,13 @@ const onDragOver = (ev) => {
 const onDrop = async (ev) => {
   ev.preventDefault();
   const from = ev.dataTransfer.getData('text/plain');
+  const fromBmtn = (await browser.bookmarks.get(from))[0];
   const to = ev.target.closest('li.bmti').dataset.bookmarkId;
   const toBmtn = (await browser.bookmarks.get(to))[0];
-  browser.bookmarks.move(from, {index: toBmtn.index})
+  // Only moving within the same folder is allowed for now
+  if (fromBmtn.parentId === toBmtn.parentId) {
+    browser.bookmarks.move(from, {index: toBmtn.index})
+  }
 };
 
 const createBookmarkTree = (node, folderOnly = false) => {
