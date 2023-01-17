@@ -27,6 +27,11 @@ const refreshCollectionView = async () => {
       }, bookmark.title],
     ]));
   });
+  if (!collection.length) {
+    $('#collection').append($create([
+      'div', {}, 'Add bookmarks or folders to the collection to see them here.'
+    ]));
+  }
 
   // Remove the bookmark from the collection when the cross symbol is clicked
   const removeBookmarkHandler = async (event) => {
