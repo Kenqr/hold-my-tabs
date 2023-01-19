@@ -8,25 +8,35 @@ const refreshCollectionView = async () => {
   $('#collection').textContent = '';
 
   // Create elements for the popup
-  const collection = await getCollection();
-  collection.forEach(bookmark => {
+  const collectionAppend = (bookmark, removable = true) => {
+    const children = [];
+    if (removable) {
+      children.push(['a', {
+        class: 'bookmark__remove',
+        style: 'cursor: pointer;',
+      }, '❌']);
+    }
+    children.push(['a', {
+        // If there is no url property, it is a folder
+        href: bookmark.url ?? browser.runtime.getURL(`bookmark-folder.html#${bookmark.id}`),
+        target: '_blank',
+        class: `bookmark__title ${bookmark.url ? 'bookmark__title--url' : 'bookmark__title--folder'}`,
+      }, bookmark.title
+    ]);
+
     $('#collection').append($create([
       'div', {
         class: 'bookmark',
         'data-bookmark-id': bookmark.id,
       },
-      ['a', {
-        class: 'bookmark__remove',
-        style: 'cursor: pointer;',
-      }, '❌'],
-      ['a', {
-        // If there is no url property, it is a folder
-        href: bookmark.url ?? browser.runtime.getURL(`bookmark-folder.html#${bookmark.id}`),
-        target: '_blank',
-        class: `bookmark__title ${bookmark.url ? 'bookmark__title--url' : 'bookmark__title--folder'}`,
-      }, bookmark.title],
+      ...children,
     ]));
-  });
+  };
+  const collection = await getCollection();
+  const unfiled = (await getBookmarks(['unfiled_____']))[0]; // Other Bookmarks
+  collection.forEach(bookmark => collectionAppend(bookmark));
+  collectionAppend(unfiled, false);
+
   if (!collection.length) {
     $('#collection').append($create([
       'div', {}, 'Add bookmarks or folders to the collection to see them here.'
