@@ -1,7 +1,7 @@
 {
     "manifest_version": 2,
     "name": "Hold My Tabs",
-    "version": "1.1.2",
+    "version": "1.2",
 
     "description": "Move tabs into and out of a bookmark folder.",
     "icons": {

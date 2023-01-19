@@ -51,9 +51,13 @@ const onDragOver = (ev) => {
 const onDrop = async (ev) => {
   ev.preventDefault();
   const from = ev.dataTransfer.getData('text/plain');
+  const fromBmtn = (await browser.bookmarks.get(from))[0];
   const to = ev.target.closest('li.bmti').dataset.bookmarkId;
   const toBmtn = (await browser.bookmarks.get(to))[0];
-  browser.bookmarks.move(from, {index: toBmtn.index})
+  // Only moving within the same folder is allowed for now
+  if (fromBmtn.parentId === toBmtn.parentId) {
+    browser.bookmarks.move(from, {index: toBmtn.index})
+  }
 };
 
 const createBookmarkTree = (node, folderOnly = false) => {
@@ -87,11 +91,7 @@ const createBookmarkTree = (node, folderOnly = false) => {
       case 'separator': {
         bmtn.classList.add('bmtn', 'bmtn_separator');
 
-        const deleteButton = createBmtnButton(
-          '🗑️',
-          deleteBookmarkButtonEventHandler,
-          'Delete'
-        );
+        const deleteButton = createBmtnButton(buttonDetails.delete);
         buttonSet.appendChild(deleteButton);
 
         const bmtnBody = document.createElement('div');
@@ -108,25 +108,13 @@ const createBookmarkTree = (node, folderOnly = false) => {
       case 'bookmark': {
         bmtn.classList.add('bmtn', 'bmtn_bookmark');
 
-        const deleteButton = createBmtnButton(
-          '🗑️',
-          deleteBookmarkButtonEventHandler,
-          'Delete'
-        );
+        const deleteButton = createBmtnButton(buttonDetails.delete);
         buttonSet.appendChild(deleteButton);
 
-        const openAndDeleteButton = createBmtnButton(
-          '↗️',
-          openAndDeleteBookmarkButtonEventHandler,
-          'Open & Delete'
-        );
+        const openAndDeleteButton = createBmtnButton(buttonDetails.openAndDelete);
         buttonSet.appendChild(openAndDeleteButton);
 
-        const renameButton = createBmtnButton(
-          '✏',
-          renameBookmarkButtonEventHandler,
-          'Rename'
-        );
+        const renameButton = createBmtnButton(buttonDetails.rename);
         buttonSet.appendChild(renameButton);
 
         const bmtnBody = document.createElement('a');
@@ -153,18 +141,10 @@ const createBookmarkTree = (node, folderOnly = false) => {
       case 'folder': {
         bmtn.classList.add('bmtn', 'bmtn_folder');
 
-        const deleteButton = createBmtnButton(
-          '🗑️',
-          deleteBookmarkButtonEventHandler,
-          'Delete'
-        );
+        const deleteButton = createBmtnButton(buttonDetails.delete);
         buttonSet.appendChild(deleteButton);
 
-        const renameButton = createBmtnButton(
-          '✏',
-          renameBookmarkButtonEventHandler,
-          'Rename'
-        );
+        const renameButton = createBmtnButton(buttonDetails.rename);
         buttonSet.appendChild(renameButton);
 
         const bmtnBody = document.createElement('a');
@@ -196,7 +176,7 @@ const createBookmarkTree = (node, folderOnly = false) => {
   return ul;
 };
 
-const createBmtnButton = (text, eventHandler, title) => {
+const createBmtnButton = ({text, eventHandler, title}) => {
   const button = document.createElement('button');
   button.classList.add('bmtn__button');
   button.textContent = text;
@@ -261,6 +241,24 @@ const renameBookmarkButtonEventHandler = async (event) => {
       {title: newTitle}
     );
   }
+};
+
+const buttonDetails = {
+  delete: {
+    text: '🗑️',
+    eventHandler: deleteBookmarkButtonEventHandler,
+    title: 'Delete',
+  },
+  openAndDelete: {
+    text: '↗️',
+    eventHandler: openAndDeleteBookmarkButtonEventHandler,
+    title: 'Open & Delete',
+  },
+  rename: {
+    text: '✏',
+    eventHandler: renameBookmarkButtonEventHandler,
+    title: 'Rename',
+  },
 };
 
 const getFavicon = (url) => {
