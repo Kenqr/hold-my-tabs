@@ -65,7 +65,7 @@ const refreshCollectionView = async () => {
   (() => {
     const onDragStart = (ev) => {
       const bm = ev.target.closest('div.bookmark');
-      ev.dataTransfer.setData('text/plain', bm.dataset.bookmarkId);
+      ev.dataTransfer.setData('application/holdmytabs-bookmarkid', bm.dataset.bookmarkId);
     };
     const onDragOver = (ev) => {
       ev.preventDefault();
@@ -73,7 +73,7 @@ const refreshCollectionView = async () => {
     };
     const onDrop = async (ev) => {
       ev.preventDefault();
-      const from = ev.dataTransfer.getData('text/plain');
+      const from = ev.dataTransfer.getData('application/holdmytabs-bookmarkid');
       const to = ev.target.closest('div.bookmark').dataset.bookmarkId;
 
       // Remove the bookmark from the collection

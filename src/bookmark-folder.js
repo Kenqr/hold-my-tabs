@@ -42,7 +42,7 @@ const renderBookmarkTree = async () => {
 
 const onDragStart = (ev) => {
   const li = ev.target.closest('li.bmti');
-  ev.dataTransfer.setData('text/plain', li.dataset.bookmarkId);
+  ev.dataTransfer.setData('application/holdmytabs-bookmarkid', li.dataset.bookmarkId);
 };
 const onDragOver = (ev) => {
   ev.preventDefault();
@@ -50,7 +50,7 @@ const onDragOver = (ev) => {
 };
 const onDrop = async (ev) => {
   ev.preventDefault();
-  const from = ev.dataTransfer.getData('text/plain');
+  const from = ev.dataTransfer.getData('application/holdmytabs-bookmarkid');
   const fromBmtn = (await browser.bookmarks.get(from))[0];
   const to = ev.target.closest('li.bmti').dataset.bookmarkId;
   const toBmtn = (await browser.bookmarks.get(to))[0];
