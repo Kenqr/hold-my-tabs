@@ -50,13 +50,40 @@ const onDragOver = (ev) => {
 };
 const onDrop = async (ev) => {
   ev.preventDefault();
-  const from = ev.dataTransfer.getData('application/holdmytabs-bookmarkid');
-  const fromBmtn = (await browser.bookmarks.get(from))[0];
+  const dt = ev.dataTransfer;
+  const ctrlKey = ev.ctrlKey;
+
   const to = ev.target.closest('li.bmti').dataset.bookmarkId;
   const toBmtn = (await browser.bookmarks.get(to))[0];
-  // Only moving within the same folder is allowed for now
-  if (fromBmtn.parentId === toBmtn.parentId) {
-    browser.bookmarks.move(from, {index: toBmtn.index})
+
+  // Move dragged bookmark to the new position
+  const from = dt.getData('application/holdmytabs-bookmarkid');
+  if (from) {
+    const fromBmtn = (await browser.bookmarks.get(from))[0];
+    // Only moving within the same folder is allowed for now
+    if (fromBmtn.parentId === toBmtn.parentId) {
+      return browser.bookmarks.move(from, {index: toBmtn.index})
+    }
+  }
+
+  // Add dragged tab from the tst sidebar to the current folder
+  try {
+    const tstTree = JSON.parse(dt.getData('application/x-treestyletab-tree'));
+    if (tstTree?.tab?.title && tstTree?.tab?.url) {
+      // Close the tab if ctrl is not pressed
+      if (!ctrlKey && tstTree?.tab?.id) {
+        browser.tabs.remove(tstTree.tab.id);
+      }
+
+      return browser.bookmarks.create({
+        parentId: toBmtn.parentId,
+        index: toBmtn.index,
+        title: tstTree.tab.title,
+        url: tstTree.tab.url,
+      });
+    }
+  } catch (e) {
+    if (!(e instanceof SyntaxError)) throw e;
   }
 };
 
