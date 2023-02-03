@@ -1,6 +1,6 @@
-// Alias for document.querySelector
-export const $ = (...args) => document.querySelector(...args);
-export const $$ = (...args) => document.querySelectorAll(...args);
+// Alias for querySelector
+export const $ = (selectors, element = document) => element.querySelector(selectors);
+export const $$ = (selectors, element = document) => element.querySelectorAll(selectors);
 
 /**
  * Create a new element
