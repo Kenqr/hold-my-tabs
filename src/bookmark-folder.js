@@ -41,8 +41,22 @@ const renderBookmarkTree = async () => {
 };
 
 const onDragStart = (ev) => {
-  const li = ev.target.closest('li.bmti');
-  ev.dataTransfer.setData('application/holdmytabs-bookmarkid', li.dataset.bookmarkId);
+  const bmti = ev.target.closest('li.bmti');
+  const bmtn = $('.bmtn', bmti);
+  const isFolder = bmtn.classList.contains('bmtn_folder');
+  const isBookmark = bmtn.classList.contains('bmtn_bookmark');
+
+  const bookmarkId = bmti.dataset.bookmarkId;
+  ev.dataTransfer.setData('application/holdmytabs-bookmarkid', bookmarkId);
+
+  if (isBookmark) {
+    const url = $('a.bmtn__body', bmti).getAttribute('href');
+    ev.dataTransfer.setData('text/uri-list', url);
+    ev.dataTransfer.setData('text/plain', url);
+  } else if (isFolder) {
+    const title = $('.bmtn__title', bmti).textContent;
+    ev.dataTransfer.setData('text/plain', title);
+  }
 };
 const onDragOver = (ev) => {
   ev.preventDefault();
