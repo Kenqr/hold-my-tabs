@@ -99,6 +99,44 @@ const onDrop = async (ev) => {
   } catch (e) {
     if (!(e instanceof SyntaxError)) throw e;
   }
+
+  // Add dragged url as new bookmarks
+  const text = dt.getData('text/plain');
+  const urlList = text.split('\n').map(str => str.trim())
+    .map(str => {
+      try {
+        return new URL(str);
+      } catch (e) {
+        return null;
+      }
+    }).filter(str => str);
+  if (urlList.length === 1) {
+    const url = urlList[0];
+    const newTitle = prompt('Title for the new bookmark:', url.href);
+    if (newTitle !== null) {
+      return browser.bookmarks.create({
+        index: toBmtn.index,
+        parentId: toBmtn.parentId,
+        title: newTitle,
+        url: url.href,
+      });
+    }
+  } else if (urlList.length >= 2) {
+    const msg = `Do you want to create ${urlList.length} new bookmarks?\n\n` +
+        urlList.map(url => url.href).join('\n');
+    if (confirm(msg)) {
+      for (let i = 0; i < urlList.length; i++) {
+        const url = urlList[i];
+        browser.bookmarks.create({
+          index: toBmtn.index + i,
+          parentId: toBmtn.parentId,
+          title: url.href,
+          url: url.href,
+        });
+      }
+      return;
+    }
+  }
 };
 
 const createBookmarkTree = (node, folderOnly = false) => {
