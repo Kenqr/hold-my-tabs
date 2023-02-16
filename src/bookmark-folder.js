@@ -104,6 +104,7 @@ const onDrop = async (ev) => {
 
   // Try to extract urls from dropped data
   urlList ??= extractUrlFromTextXMozUrl(dt);
+  urlList ??= extractUrlFromTextUriList(dt);
   urlList ??= extractUrlFromTextPlain(dt);
 
   // Add extracted urls as bookmarks
@@ -124,6 +125,22 @@ const extractUrlFromTextXMozUrl = (dt) => {
     }
   }
   return urlList;
+};
+
+const extractUrlFromTextUriList = (dt) => {
+  return dt.getData('text/uri-list')
+    .split('\n')
+    .filter(str => str.charAt(0) !== '#') // Remove comments
+    .map(str => str.trim())
+    .map(str => {
+      try {
+        return new URL(str);
+      } catch (e) {
+        return null;
+      }
+    })
+    .filter(str => str)
+  ;
 };
 
 const extractUrlFromTextPlain = (dt) => {
