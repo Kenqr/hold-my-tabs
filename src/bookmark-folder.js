@@ -103,10 +103,27 @@ const onDrop = async (ev) => {
   let urlList = null;
 
   // Try to extract urls from dropped data
+  urlList ??= extractUrlFromTextXMozUrl(dt);
   urlList ??= extractUrlFromTextPlain(dt);
 
   // Add extracted urls as bookmarks
   if (urlList) addBookmarks(urlList, toBmtn.index, toBmtn.parentId);
+};
+
+const extractUrlFromTextXMozUrl = (dt) => {
+  const mozUrl = dt.getData('text/x-moz-url');
+  const pieces = mozUrl.split('\n');
+  const urlList = [];
+  for (let i = 0; i < pieces.length; i += 2) {
+    try {
+      const url = new URL(pieces[i]);
+      url.title = pieces[i+1];
+      urlList.push(url);
+    } catch (e) {
+      if (!(e instanceof TypeError)) throw e;
+    }
+  }
+  return urlList;
 };
 
 const extractUrlFromTextPlain = (dt) => {
