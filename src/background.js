@@ -139,9 +139,7 @@ const menuCopyTabsToFolder = async (tab, hmtTab) => {
   return tabsCopied;
 };
 
-
-// Create menu items
-browser.runtime.onInstalled.addListener(() => {
+const createMenus = () => {
   browser.menus.create({
     id: 'move-to-folder',
     title: 'Move to Folder',
@@ -183,7 +181,11 @@ browser.runtime.onInstalled.addListener(() => {
     title: 'Add to collection',
     contexts: ['bookmark'],
   });
-});
+};
+
+// Create menu items
+createMenus(); // Attempt to workaround https://bugzilla.mozilla.org/show_bug.cgi?id=1771328
+browser.runtime.onInstalled.addListener(() => createMenus());
 
 
 // Create event listeners
