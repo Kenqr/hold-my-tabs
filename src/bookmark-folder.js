@@ -99,6 +99,88 @@ const onDrop = async (ev) => {
   } catch (e) {
     if (!(e instanceof SyntaxError)) throw e;
   }
+
+  let urlList = null;
+
+  // Try to extract urls from dropped data
+  urlList ??= extractUrlFromTextXMozUrl(dt);
+  urlList ??= extractUrlFromTextUriList(dt);
+  urlList ??= extractUrlFromTextPlain(dt);
+
+  // Add extracted urls as bookmarks
+  if (urlList) addBookmarks(urlList, toBmtn.index, toBmtn.parentId);
+};
+
+const extractUrlFromTextXMozUrl = (dt) => {
+  const mozUrl = dt.getData('text/x-moz-url');
+  const pieces = mozUrl.split('\n');
+  const urlList = [];
+  for (let i = 0; i < pieces.length; i += 2) {
+    try {
+      const url = new URL(pieces[i]);
+      url.title = pieces[i+1];
+      urlList.push(url);
+    } catch (e) {
+      if (!(e instanceof TypeError)) throw e;
+    }
+  }
+  return urlList;
+};
+
+const extractUrlFromTextUriList = (dt) => {
+  return dt.getData('text/uri-list')
+    .split('\n')
+    .filter(str => str.charAt(0) !== '#') // Remove comments
+    .map(str => str.trim())
+    .map(str => {
+      try {
+        return new URL(str);
+      } catch (e) {
+        return null;
+      }
+    })
+    .filter(str => str)
+  ;
+};
+
+const extractUrlFromTextPlain = (dt) => {
+  return dt.getData('text/plain')
+    .split('\n')
+    .map(str => str.trim())
+    .map(str => {
+      try {
+        return new URL(str);
+      } catch (e) {
+        return null;
+      }
+    })
+    .filter(str => str)
+  ;
+};
+
+const addBookmarks = (urlList, index, parentId) => {
+  if (urlList.length === 1) {
+    const url = urlList[0];
+    url.title ??= prompt('Title for the new bookmark:', url.href);
+    if (url.title === null) return;
+  } else if (urlList.length >= 2) {
+    urlList.forEach(url => url.title ??= url.href); // Use href as the default title
+
+    // Confirm adding multiple bookmarks
+    const msg = `Do you want to create ${urlList.length} new bookmarks?\n\n` +
+        urlList.map(url => url.title).join('\n');
+    if (!confirm(msg)) return;
+  }
+
+  for (let i = 0; i < urlList.length; i++) {
+    const url = urlList[i];
+    browser.bookmarks.create({
+      index: index + i,
+      parentId: parentId,
+      title: url.title,
+      url: url.href,
+    });
+  }
 };
 
 const createBookmarkTree = (node, folderOnly = false) => {
