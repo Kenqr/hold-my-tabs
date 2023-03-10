@@ -100,16 +100,30 @@ const onDrop = async (ev) => {
     if (!(e instanceof SyntaxError)) throw e;
   }
 
-  let urlList = null;
-
   // Try to extract urls from dropped data
-  urlList ??= extractUrlFromTextXMozUrl(dt);
-  urlList ??= extractUrlFromTextUriList(dt);
-  urlList ??= extractUrlFromTextHtml(dt);
-  urlList ??= extractUrlFromTextPlain(dt);
+  const urlList = extractUrlFromDropData(dt);
 
   // Add extracted urls as bookmarks
   if (urlList) addBookmarks(urlList, toBmtn.index, toBmtn.parentId);
+};
+
+const extractUrlFromDropData = (dt) => {
+  const types = dt.types;
+
+  const extractMethods = {
+    'text/x-moz-url': extractUrlFromTextXMozUrl,
+    'text/uri-list': extractUrlFromTextUriList,
+    'text/html': extractUrlFromTextHtml,
+    'text/plain': extractUrlFromTextPlain,
+  };
+
+  for (const format in extractMethods) {
+    if (!types.includes(format)) continue;
+    const urlList = extractMethods[format](dt);
+    if (urlList?.length) return urlList;
+  }
+
+  return null;
 };
 
 const extractUrlFromTextXMozUrl = (dt) => {
