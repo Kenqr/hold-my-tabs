@@ -1,5 +1,17 @@
-// Alias for querySelector
+/**
+ * Alias for querySelector
+ * @param {string} selectors - A string containing one or more selectors to match
+ * @param {Element} element - The base element that would be matched against
+ * @returns {?Element} The first element that matches the selectors
+ */
 export const $ = (selectors, element = document) => element.querySelector(selectors);
+
+/**
+ * Alias for querySelectorAll
+ * @param {string} selectors - A string containing one or more selectors to match
+ * @param {Element} element - The base element that would be matched against
+ * @returns {NodeList.<Element>} A non-live NodeList containing matched elements
+ */
 export const $$ = (selectors, element = document) => element.querySelectorAll(selectors);
 
 /**
@@ -7,7 +19,7 @@ export const $$ = (selectors, element = document) => element.querySelectorAll(se
  * @param {string} tag - The name of the element
  * @param {object} attrs - Attributes of the element
  * @param {array} children - Child elements to be created recursively
- * @returns The new element
+ * @returns {Element} The new element
  */
 export const $create = ([tag, attrs = {}, ...children]) => {
   // Create the base element
@@ -27,10 +39,20 @@ export const $create = ([tag, attrs = {}, ...children]) => {
   return elem;
 };
 
+/**
+ * @param {Array} array
+ * @param {Function} callback
+ * @returns {Promise.<Array>}
+ */
 export const asyncMap = async (array, callback) => {
   return Promise.all(array.map(callback));
 }
 
+/**
+ * @param {Array} array
+ * @param {Function} callback
+ * @returns {Promise.<Array>}
+ */
 export const asyncFilter = async (array, callback) => {
   const filterMap = await asyncMap(array, callback);
   return array.filter((value, index) => filterMap[index]);
