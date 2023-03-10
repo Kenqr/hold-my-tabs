@@ -40,6 +40,7 @@ const renderBookmarkTree = async () => {
   $('#bookmarkTree').appendChild(bookmarkTree);
 };
 
+/** @param {DragEvent} ev */
 const onDragStart = (ev) => {
   const bmti = ev.target.closest('li.bmti');
   const bmtn = $('.bmtn', bmti);
@@ -58,10 +59,12 @@ const onDragStart = (ev) => {
     ev.dataTransfer.setData('text/plain', title);
   }
 };
+/** @param {DragEvent} ev */
 const onDragOver = (ev) => {
   ev.preventDefault();
   ev.dataTransfer.dropEffect = 'move';
 };
+/** @param {DragEvent} ev */
 const onDrop = async (ev) => {
   ev.preventDefault();
   const dt = ev.dataTransfer;
@@ -107,6 +110,10 @@ const onDrop = async (ev) => {
   if (urlList) addBookmarks(urlList, toBmtn.index, toBmtn.parentId);
 };
 
+/**
+ * @param {DataTransfer} dt
+ * @returns {?URL[]}
+ */
 const extractUrlFromDropData = (dt) => {
   const types = dt.types;
 
@@ -126,6 +133,10 @@ const extractUrlFromDropData = (dt) => {
   return null;
 };
 
+/**
+ * @param {DataTransfer} dt
+ * @returns {?URL[]}
+ */
 const extractUrlFromTextXMozUrl = (dt) => {
   const mozUrl = dt.getData('text/x-moz-url');
   const pieces = mozUrl.split('\n');
@@ -142,6 +153,10 @@ const extractUrlFromTextXMozUrl = (dt) => {
   return urlList;
 };
 
+/**
+ * @param {DataTransfer} dt
+ * @returns {?URL[]}
+ */
 const extractUrlFromTextUriList = (dt) => {
   return dt.getData('text/uri-list')
     .split('\n')
@@ -158,6 +173,10 @@ const extractUrlFromTextUriList = (dt) => {
   ;
 };
 
+/**
+ * @param {DataTransfer} dt
+ * @returns {?URL[]}
+ */
 const extractUrlFromTextHtml = (dt) => {
   const html = dt.getData('text/html');
   const doc = (new DOMParser()).parseFromString(html, 'text/html');
@@ -170,6 +189,10 @@ const extractUrlFromTextHtml = (dt) => {
   });
 };
 
+/**
+ * @param {DataTransfer} dt
+ * @returns {?URL[]}
+ */
 const extractUrlFromTextPlain = (dt) => {
   return dt.getData('text/plain')
     .split('\n')
