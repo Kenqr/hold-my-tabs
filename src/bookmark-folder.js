@@ -40,6 +40,7 @@ const renderBookmarkTree = async () => {
   $('#bookmarkTree').appendChild(bookmarkTree);
 };
 
+/** @param {DragEvent} ev */
 const onDragStart = (ev) => {
   const bmti = ev.target.closest('li.bmti');
   const bmtn = $('.bmtn', bmti);
@@ -58,14 +59,20 @@ const onDragStart = (ev) => {
     ev.dataTransfer.setData('text/plain', title);
   }
 };
+/** @param {DragEvent} ev */
 const onDragOver = (ev) => {
   ev.preventDefault();
   ev.dataTransfer.dropEffect = 'move';
 };
+/** @param {DragEvent} ev */
 const onDrop = async (ev) => {
   ev.preventDefault();
   const dt = ev.dataTransfer;
   const ctrlKey = ev.ctrlKey;
+
+  // Skip if the event is from a child bookmark,
+  // to avoid events from being processed multiple times.
+  if (ev.target.closest('li.bmti') !== ev.currentTarget.closest('li.bmti')) return;
 
   const to = ev.target.closest('li.bmti').dataset.bookmarkId;
   const toBmtn = (await browser.bookmarks.get(to))[0];
@@ -100,17 +107,40 @@ const onDrop = async (ev) => {
     if (!(e instanceof SyntaxError)) throw e;
   }
 
-  let urlList = null;
-
   // Try to extract urls from dropped data
-  urlList ??= extractUrlFromTextXMozUrl(dt);
-  urlList ??= extractUrlFromTextUriList(dt);
-  urlList ??= extractUrlFromTextPlain(dt);
+  const urlList = extractUrlFromDropData(dt);
 
   // Add extracted urls as bookmarks
   if (urlList) addBookmarks(urlList, toBmtn.index, toBmtn.parentId);
 };
 
+/**
+ * @param {DataTransfer} dt
+ * @returns {?URL[]}
+ */
+const extractUrlFromDropData = (dt) => {
+  const types = dt.types;
+
+  const extractMethods = {
+    'text/x-moz-url': extractUrlFromTextXMozUrl,
+    'text/uri-list': extractUrlFromTextUriList,
+    'text/html': extractUrlFromTextHtml,
+    'text/plain': extractUrlFromTextPlain,
+  };
+
+  for (const format in extractMethods) {
+    if (!types.includes(format)) continue;
+    const urlList = extractMethods[format](dt);
+    if (urlList?.length) return urlList;
+  }
+
+  return null;
+};
+
+/**
+ * @param {DataTransfer} dt
+ * @returns {?URL[]}
+ */
 const extractUrlFromTextXMozUrl = (dt) => {
   const mozUrl = dt.getData('text/x-moz-url');
   const pieces = mozUrl.split('\n');
@@ -127,6 +157,10 @@ const extractUrlFromTextXMozUrl = (dt) => {
   return urlList;
 };
 
+/**
+ * @param {DataTransfer} dt
+ * @returns {?URL[]}
+ */
 const extractUrlFromTextUriList = (dt) => {
   return dt.getData('text/uri-list')
     .split('\n')
@@ -143,6 +177,26 @@ const extractUrlFromTextUriList = (dt) => {
   ;
 };
 
+/**
+ * @param {DataTransfer} dt
+ * @returns {?URL[]}
+ */
+const extractUrlFromTextHtml = (dt) => {
+  const html = dt.getData('text/html');
+  const doc = (new DOMParser()).parseFromString(html, 'text/html');
+  const links = [...doc.querySelectorAll('a')];
+
+  return links.map(link => {
+    const url = new URL(link.getAttribute('href'));
+    url.title = link.textContent;
+    return url;
+  });
+};
+
+/**
+ * @param {DataTransfer} dt
+ * @returns {?URL[]}
+ */
 const extractUrlFromTextPlain = (dt) => {
   return dt.getData('text/plain')
     .split('\n')
