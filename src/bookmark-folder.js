@@ -70,6 +70,10 @@ const onDrop = async (ev) => {
   const dt = ev.dataTransfer;
   const ctrlKey = ev.ctrlKey;
 
+  // Skip if the event is from a child bookmark,
+  // to avoid events from being processed multiple times.
+  if (ev.target.closest('li.bmti') !== ev.currentTarget.closest('li.bmti')) return;
+
   const to = ev.target.closest('li.bmti').dataset.bookmarkId;
   const toBmtn = (await browser.bookmarks.get(to))[0];
 
