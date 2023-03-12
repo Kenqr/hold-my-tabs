@@ -48,7 +48,7 @@ const getFolderFromHmtTab = async (hmtTab) => {
 /**
 * Check if folder contains a direct child with url.
 *
-* @param {bookmarks.BookmarkTreeNode} folder
+* @param {browser.bookmarks.BookmarkTreeNode} folder
 * @param {string} url 
 * @returns {boolean}
 */
@@ -61,9 +61,9 @@ const folderHasChildWithUrl = (folder, url) => {
 
 /**
  * Copy tab into HMT tab.
- * @param {tabs.Tab} tab - The tab to be copied.
- * @param {tabs.Tab} hmtTab - The HMT tab to be copied into.
- * @returns {?Promise<bookmarks.BookmarkTreeNode>}
+ * @param {browser.tabs.Tab} tab - The tab to be copied.
+ * @param {browser.tabs.Tab} hmtTab - The HMT tab to be copied into.
+ * @returns {?Promise.<browser.bookmarks.BookmarkTreeNode>}
  *    The newly created bookmark, or null if the tab is already bookmarked.
  */
 const copyTabToHmtTab = async (tab, hmtTab) => {
@@ -75,10 +75,10 @@ const copyTabToHmtTab = async (tab, hmtTab) => {
 
 /**
  * Bookmark the tab if it is not already in the folder.
- * @param {tabs.Tab} tab 
- * @param {bookmarks.BookmarkTreeNode} folder 
+ * @param {browser.tabs.Tab} tab 
+ * @param {browser.bookmarks.BookmarkTreeNode} folder 
  * @throws {string}
- * @returns {?Promise<bookmarks.BookmarkTreeNode>}
+ * @returns {?Promise.<browser.bookmarks.BookmarkTreeNode>}
  *    The newly created bookmark, or null if the tab is already bookmarked.
  */
 const copyTabToFolder = async (tab, folder) => {
@@ -98,8 +98,8 @@ const copyTabToFolder = async (tab, folder) => {
 
 /**
  * Bookmark & close tabs between this tab and previous HMT tab.
- * @param {tabs.Tab} tab - This tab.
- * @param {tabs.Tab} hmtTab - Previous HMT tab.
+ * @param {browser.tabs.Tab} tab - This tab.
+ * @param {browser.tabs.Tab} hmtTab - Previous HMT tab.
  */
 const menuMoveTabsToFolder = async (tab, hmtTab) => {
   const tabsCopied = await menuCopyTabsToFolder(tab, hmtTab);
@@ -110,9 +110,9 @@ const menuMoveTabsToFolder = async (tab, hmtTab) => {
 
 /**
  * Bookmark tabs between this tab and previous HMT tab.
- * @param {tabs.Tab} tab - This tab.
- * @param {tabs.Tab} hmtTab - Previous HMT tab.
- * @returns {tabs.Tab[]} Bookmarked tabs.
+ * @param {browser.tabs.Tab} tab - This tab.
+ * @param {browser.tabs.Tab} hmtTab - Previous HMT tab.
+ * @returns {browser.tabs.Tab[]} Bookmarked tabs.
  */
 const menuCopyTabsToFolder = async (tab, hmtTab) => {
   const folder = await getFolderFromHmtTab(hmtTab);

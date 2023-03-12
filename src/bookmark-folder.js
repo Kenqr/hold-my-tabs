@@ -454,7 +454,7 @@ const getFavicon = (url) => {
 /**
  * Decides if bookmark is in current folder
  * 
- * @param {bookmarks.BookmarkTreeNode} bookmark - The bookmark tree node.
+ * @param {browser.bookmarks.BookmarkTreeNode} bookmark - The bookmark tree node.
  * @returns {boolean} Whether bookmark is in current folder or not.
  */
  const isInCurrentFolder = async (bookmark) => {
@@ -516,7 +516,7 @@ const getCurrentFolderId = () => {
 /**
  * Get the type of the bookmark tree node.
  * 
- * @param {bookmarks.BookmarkTreeNode} node - The bookmark tree node.
+ * @param {browser.bookmarks.BookmarkTreeNode} node - The bookmark tree node.
  * @returns {string} The type of the bookmark tree node,
  *    which is one of the following three values: 'bookmark'|'folder'|'separator'
  */

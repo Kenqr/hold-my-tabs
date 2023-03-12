@@ -105,7 +105,7 @@ const refreshCollectionView = async () => {
 
 /**
  * Get the collection as bookmarks, but remove deleted bookmarks beforehand.
- * @returns {Promise<bookmarks.BookmarkTreeNode>} The collection as bookmarks
+ * @returns {Promise.<browser.bookmarks.BookmarkTreeNode>} The collection as bookmarks
  */
 const getCollection = async () => {
   const {collection = []} = await browser.storage.local.get('collection');
@@ -129,7 +129,7 @@ const getCollection = async () => {
  * 2. Does not accept a single string to be the parameter.
  * 3. Accepts an empty array as the parameter.
  * @param {string[]} bookmarkIds 
- * @returns {bookmarks.BookmarkTreeNode[]}
+ * @returns {browser.bookmarks.BookmarkTreeNode[]}
  *    Array of bookmarks on success, false if any of the bookmarks does not exist
  */
 const getBookmarks = async (bookmarkIds) => {

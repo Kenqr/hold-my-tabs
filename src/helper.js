@@ -17,8 +17,8 @@ export const $$ = (selectors, element = document) => element.querySelectorAll(se
 /**
  * Create a new element
  * @param {string} tag - The name of the element
- * @param {object} attrs - Attributes of the element
- * @param {array} children - Child elements to be created recursively
+ * @param {Object} attrs - Attributes of the element
+ * @param {Array} children - Child elements to be created recursively
  * @returns {Element} The new element
  */
 export const $create = ([tag, attrs = {}, ...children]) => {
