@@ -1,4 +1,4 @@
-import { $, getClosestFolderId } from './helper.js';
+import { $ } from './helper.js';
 
 const init = async () => {
   renderFolderTree();
@@ -76,12 +76,14 @@ const onDrop = async (ev) => {
 
   const to = ev.target.closest('li.bmti').dataset.bookmarkId;
   const toBmtn = (await browser.bookmarks.get(to))[0];
+  const droppedOnFolder = getBmtnType(toBmtn) === 'folder';
+  const toParentId = droppedOnFolder ? toBmtn.id : toBmtn.parentId;
+  const toIndex = droppedOnFolder ? undefined : toBmtn.index;
 
   // Move dragged bookmark to the new position
   const from = dt.getData('application/holdmytabs-bookmarkid');
   if (from) {
-    const parentId = await getClosestFolderId(to);
-    return browser.bookmarks.move(from, { parentId, index: toBmtn.index })
+    return browser.bookmarks.move(from, { parentId: toParentId, index: toIndex });
   }
 
   // Add dragged tab from the tst sidebar to the current folder
@@ -94,8 +96,8 @@ const onDrop = async (ev) => {
       }
 
       return browser.bookmarks.create({
-        parentId: toBmtn.parentId,
-        index: toBmtn.index,
+        parentId: toParentId,
+        index: toIndex,
         title: tstTree.tab.title,
         url: tstTree.tab.url,
       });
@@ -108,7 +110,7 @@ const onDrop = async (ev) => {
   const urlList = extractUrlFromDropData(dt);
 
   // Add extracted urls as bookmarks
-  if (urlList) addBookmarks(urlList, toBmtn.index, toBmtn.parentId);
+  if (urlList) addBookmarks(urlList, toParentId, toIndex);
 };
 
 /**
@@ -209,7 +211,12 @@ const extractUrlFromTextPlain = (dt) => {
   ;
 };
 
-const addBookmarks = (urlList, index, parentId) => {
+/**
+ * @param {URL[]} urlList
+ * @param {string} parentId
+ * @param {number=} index
+ */
+const addBookmarks = (urlList, parentId, index) => {
   if (urlList.length === 1) {
     const url = urlList[0];
     url.title ??= prompt('Title for the new bookmark:', url.href);
@@ -225,8 +232,9 @@ const addBookmarks = (urlList, index, parentId) => {
 
   for (let i = 0; i < urlList.length; i++) {
     const url = urlList[i];
+    const newIndex = index === undefined ? undefined : index + i;
     browser.bookmarks.create({
-      index: index + i,
+      index: newIndex,
       parentId: parentId,
       title: url.title,
       url: url.href,
