@@ -57,3 +57,13 @@ export const asyncFilter = async (array, callback) => {
   const filterMap = await asyncMap(array, callback);
   return array.filter((value, index) => filterMap[index]);
 }
+
+/**
+ * Get id of closest folder from this bookmark
+ * @param {string} bookmarkId - Id of this bookmark
+ * @returns {string} BookmarkId if this bookmark is a folder, otherwise parent id
+ */
+export const getClosestFolderId = async (bookmarkId) => {
+  const bookmarks = await browser.bookmarks.get(bookmarkId);
+  return bookmarks[0].url ? bookmarks[0].parentId : bookmarkId;
+};

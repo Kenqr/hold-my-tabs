@@ -1,3 +1,5 @@
+import { getClosestFolderId } from './helper.js';
+
 const openHmtPage = async ({index, bookmarkId} = {}) => {
   const bookmarkFolderId = bookmarkId ? (await getClosestFolderId(bookmarkId)) : '';
 
@@ -5,16 +7,6 @@ const openHmtPage = async ({index, bookmarkId} = {}) => {
     url: `/bookmark-folder.html#${bookmarkFolderId}`,
     index: index,
   });
-};
-
-/**
- * Get id of closest folder from this bookmark
- * @param {string} bookmarkId - Id of this bookmark
- * @returns {string} - bookmarkId if this bookmark is a folder, otherwise parent id
- */
-const getClosestFolderId = async (bookmarkId) => {
-  const bookmarks = await browser.bookmarks.get(bookmarkId);
-  return bookmarks[0].url ? bookmarks[0].parentId : bookmarkId;
 };
 
 const findClosestHmtTabOnLeft = async (currentTabIndex) => {

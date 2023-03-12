@@ -1,4 +1,4 @@
-import {$} from './helper.js';
+import { $, getClosestFolderId } from './helper.js';
 
 const init = async () => {
   renderFolderTree();
@@ -80,11 +80,8 @@ const onDrop = async (ev) => {
   // Move dragged bookmark to the new position
   const from = dt.getData('application/holdmytabs-bookmarkid');
   if (from) {
-    const fromBmtn = (await browser.bookmarks.get(from))[0];
-    // Only moving within the same folder is allowed for now
-    if (fromBmtn.parentId === toBmtn.parentId) {
-      return browser.bookmarks.move(from, {index: toBmtn.index})
-    }
+    const parentId = await getClosestFolderId(to);
+    return browser.bookmarks.move(from, { parentId, index: toBmtn.index })
   }
 
   // Add dragged tab from the tst sidebar to the current folder
