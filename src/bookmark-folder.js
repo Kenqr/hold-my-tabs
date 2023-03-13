@@ -106,10 +106,15 @@ const onDrop = async (ev) => {
     if (!(e instanceof SyntaxError)) throw e;
   }
 
-  // Try to extract urls from dropped data
-  const urlList = extractUrlFromDropData(dt);
+  // Move dropped bookmark to new location
+  const mozPlace = dt.getData('text/x-moz-place');
+  if (mozPlace) {
+    const placeObject = JSON.parse(mozPlace);
+    return browser.bookmarks.move(placeObject.itemGuid, { parentId: toParentId, index: toIndex });
+  }
 
-  // Add extracted urls as bookmarks
+  // Try to extract urls from dropped data and add as bookmarks
+  const urlList = extractUrlFromDropData(dt);
   if (urlList) addBookmarks(urlList, toParentId, toIndex);
 };
 
