@@ -105,3 +105,14 @@ html, body {
 .bmtn__icon {
     width: 1em;
 }
+
+.bmtn_bookmark .bmtn__icon {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.bmtn_folder .bmtn__icon {
+    width: 1.4em;
+    font-size: 0.8em;
+}
