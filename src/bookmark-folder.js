@@ -215,8 +215,9 @@ const extractUrlFromTextPlain = (dt) => {
  * @param {URL[]} urlList
  * @param {string} parentId
  * @param {number=} index
+ * @returns {Promise.<browser.bookmarks.BookmarkTreeNode[]>}
  */
-const addBookmarks = (urlList, parentId, index) => {
+const addBookmarks = async (urlList, parentId, index) => {
   if (urlList.length === 1) {
     const url = urlList[0];
     url.title ??= prompt('Title for the new bookmark:', url.href);
@@ -230,16 +231,19 @@ const addBookmarks = (urlList, parentId, index) => {
     if (!confirm(msg)) return;
   }
 
+  const bmtnList = [];
   for (let i = 0; i < urlList.length; i++) {
     const url = urlList[i];
     const newIndex = index === undefined ? undefined : index + i;
-    browser.bookmarks.create({
+    const bmtn = await browser.bookmarks.create({
       index: newIndex,
       parentId: parentId,
       title: url.title,
       url: url.href,
     });
+    bmtnList.push(bmtn);
   }
+  return bmtnList;
 };
 
 const createBookmarkTree = (node, folderOnly = false) => {
