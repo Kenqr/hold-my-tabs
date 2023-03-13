@@ -96,6 +96,23 @@ html, body {
     color: hsl(230, 100%, 50%);
 }
 
+.bmtn_separator .bmtn__title {
+    margin: auto;
+    width: 100%;
+    border-color: #eee;
+}
+
 .bmtn__icon {
     width: 1em;
+}
+
+.bmtn_bookmark .bmtn__icon {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.bmtn_folder .bmtn__icon {
+    width: 1.4em;
+    font-size: 0.8em;
 }

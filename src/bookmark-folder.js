@@ -1,4 +1,4 @@
-import {$} from './helper.js';
+import { $ } from './helper.js';
 
 const init = async () => {
   renderFolderTree();
@@ -76,15 +76,14 @@ const onDrop = async (ev) => {
 
   const to = ev.target.closest('li.bmti').dataset.bookmarkId;
   const toBmtn = (await browser.bookmarks.get(to))[0];
+  const droppedOnFolder = getBmtnType(toBmtn) === 'folder';
+  const toParentId = droppedOnFolder ? toBmtn.id : toBmtn.parentId;
+  const toIndex = droppedOnFolder ? undefined : toBmtn.index;
 
   // Move dragged bookmark to the new position
   const from = dt.getData('application/holdmytabs-bookmarkid');
   if (from) {
-    const fromBmtn = (await browser.bookmarks.get(from))[0];
-    // Only moving within the same folder is allowed for now
-    if (fromBmtn.parentId === toBmtn.parentId) {
-      return browser.bookmarks.move(from, {index: toBmtn.index})
-    }
+    return browser.bookmarks.move(from, { parentId: toParentId, index: toIndex });
   }
 
   // Add dragged tab from the tst sidebar to the current folder
@@ -97,8 +96,8 @@ const onDrop = async (ev) => {
       }
 
       return browser.bookmarks.create({
-        parentId: toBmtn.parentId,
-        index: toBmtn.index,
+        parentId: toParentId,
+        index: toIndex,
         title: tstTree.tab.title,
         url: tstTree.tab.url,
       });
@@ -107,11 +106,16 @@ const onDrop = async (ev) => {
     if (!(e instanceof SyntaxError)) throw e;
   }
 
-  // Try to extract urls from dropped data
-  const urlList = extractUrlFromDropData(dt);
+  // Move dropped bookmark to new location
+  const mozPlace = dt.getData('text/x-moz-place');
+  if (mozPlace) {
+    const placeObject = JSON.parse(mozPlace);
+    return browser.bookmarks.move(placeObject.itemGuid, { parentId: toParentId, index: toIndex });
+  }
 
-  // Add extracted urls as bookmarks
-  if (urlList) addBookmarks(urlList, toBmtn.index, toBmtn.parentId);
+  // Try to extract urls from dropped data and add as bookmarks
+  const urlList = extractUrlFromDropData(dt);
+  if (urlList) addBookmarks(urlList, toParentId, toIndex);
 };
 
 /**
@@ -212,7 +216,13 @@ const extractUrlFromTextPlain = (dt) => {
   ;
 };
 
-const addBookmarks = (urlList, index, parentId) => {
+/**
+ * @param {URL[]} urlList
+ * @param {string} parentId
+ * @param {number=} index
+ * @returns {Promise.<browser.bookmarks.BookmarkTreeNode[]>}
+ */
+const addBookmarks = async (urlList, parentId, index) => {
   if (urlList.length === 1) {
     const url = urlList[0];
     url.title ??= prompt('Title for the new bookmark:', url.href);
@@ -226,15 +236,19 @@ const addBookmarks = (urlList, index, parentId) => {
     if (!confirm(msg)) return;
   }
 
+  const bmtnList = [];
   for (let i = 0; i < urlList.length; i++) {
     const url = urlList[i];
-    browser.bookmarks.create({
-      index: index + i,
+    const newIndex = index === undefined ? undefined : index + i;
+    const bmtn = await browser.bookmarks.create({
+      index: newIndex,
       parentId: parentId,
       title: url.title,
       url: url.href,
     });
+    bmtnList.push(bmtn);
   }
+  return bmtnList;
 };
 
 const createBookmarkTree = (node, folderOnly = false) => {
@@ -275,9 +289,8 @@ const createBookmarkTree = (node, folderOnly = false) => {
         bmtnBody.classList.add('bmtn__body');
         bmtn.appendChild(bmtnBody);
 
-        const title = document.createElement('span');
+        const title = document.createElement('hr');
         title.classList.add('bmtn__title');
-        title.textContent = '--------------------------------';
         bmtnBody.appendChild(title);
 
         break;
@@ -454,7 +467,7 @@ const getFavicon = (url) => {
 /**
  * Decides if bookmark is in current folder
  * 
- * @param {bookmarks.BookmarkTreeNode} bookmark - The bookmark tree node.
+ * @param {browser.bookmarks.BookmarkTreeNode} bookmark - The bookmark tree node.
  * @returns {boolean} Whether bookmark is in current folder or not.
  */
  const isInCurrentFolder = async (bookmark) => {
@@ -516,7 +529,7 @@ const getCurrentFolderId = () => {
 /**
  * Get the type of the bookmark tree node.
  * 
- * @param {bookmarks.BookmarkTreeNode} node - The bookmark tree node.
+ * @param {browser.bookmarks.BookmarkTreeNode} node - The bookmark tree node.
  * @returns {string} The type of the bookmark tree node,
  *    which is one of the following three values: 'bookmark'|'folder'|'separator'
  */
