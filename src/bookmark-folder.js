@@ -289,9 +289,8 @@ const createBookmarkTree = (node, folderOnly = false) => {
         bmtnBody.classList.add('bmtn__body');
         bmtn.appendChild(bmtnBody);
 
-        const title = document.createElement('span');
+        const title = document.createElement('hr');
         title.classList.add('bmtn__title');
-        title.textContent = '--------------------------------';
         bmtnBody.appendChild(title);
 
         break;

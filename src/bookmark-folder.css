@@ -96,6 +96,12 @@ html, body {
     color: hsl(230, 100%, 50%);
 }
 
+.bmtn_separator .bmtn__title {
+    margin: auto;
+    width: 100%;
+    border-color: #eee;
+}
+
 .bmtn__icon {
     width: 1em;
 }
