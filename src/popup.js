@@ -2,6 +2,9 @@ import {$, $$, $create, asyncFilter} from './helper.js';
 
 const init = async () => {
   refreshCollectionView();
+
+  // Attemp to fix menus
+  browser.runtime.sendMessage({ type: 'createMenus' });
 };
 
 const refreshCollectionView = async () => {
