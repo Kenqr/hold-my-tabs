@@ -176,9 +176,13 @@ const createMenus = () => {
 };
 
 // Create menu items
-createMenus(); // Attempt to workaround https://bugzilla.mozilla.org/show_bug.cgi?id=1771328
 browser.runtime.onInstalled.addListener(() => createMenus());
-
+// Attempting to work around bug https://bugzilla.mozilla.org/show_bug.cgi?id=1771328
+createMenus();
+browser.runtime.onMessage.addListener((data) => {
+  if (data.type === 'createMenus') createMenus(); // Fix menus
+  return false;
+});
 
 // Create event listeners
 browser.menus.onClicked.addListener(async (info, tab) => {
