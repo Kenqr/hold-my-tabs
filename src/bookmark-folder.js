@@ -251,6 +251,15 @@ const addBookmarks = async (urlList, parentId, index) => {
   return bmtnList;
 };
 
+/** @param {MouseEvent} ev */
+const onBookmarkClick = (ev) => {
+  if (!ev.ctrlKey && !ev.altKey) {
+    // Clicking or shift-clicking opens the bookmark in a new foreground tab
+    ev.preventDefault();
+    browser.tabs.create({url: ev.currentTarget.href, active: true});
+  }
+}
+
 const createBookmarkTree = (node, folderOnly = false) => {
   const ul = document.createElement('ul');
   ul.classList.add('bookmark-folder-content');
@@ -310,7 +319,7 @@ const createBookmarkTree = (node, folderOnly = false) => {
         const bmtnBody = document.createElement('a');
         bmtnBody.classList.add('bmtn__body');
         bmtnBody.href = child.url;
-        bmtnBody.target = '_blank';
+        bmtnBody.addEventListener('click', onBookmarkClick);
         bmtn.appendChild(bmtnBody);
 
         const icon = document.createElement('div');
