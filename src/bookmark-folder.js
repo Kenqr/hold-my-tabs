@@ -252,11 +252,16 @@ const addBookmarks = async (urlList, parentId, index) => {
 };
 
 /** @param {MouseEvent} ev */
-const onBookmarkClick = (ev) => {
+const onBookmarkClick = async (ev) => {
   if (!ev.ctrlKey && !ev.altKey) {
     // Clicking or shift-clicking opens the bookmark in a new foreground tab
     ev.preventDefault();
-    browser.tabs.create({url: ev.currentTarget.href, active: true});
+    const url = ev.currentTarget.href;
+
+    const tabs = await browser.tabs.query({active: true, currentWindow: true});
+    await browser.tabs.create({url: url, active: true});
+    // Discards current HMT tab
+    browser.tabs.discard(tabs[0].id);
   }
 }
 
