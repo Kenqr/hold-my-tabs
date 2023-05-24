@@ -14,7 +14,8 @@ module.exports = {
   },
   rules: {
     'no-var': 'error',
-    'no-console': ['warn', {allow: ['warn', 'error']}],
+    'no-console': ['warn', { allow: ['warn', 'error'] }],
     'no-unused-vars': 'warn',
+    'no-warning-comments': ['warn', { terms: ['todo', 'fixme', 'xxx', 'test'] }],
   },
 };

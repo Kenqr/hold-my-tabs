@@ -251,6 +251,29 @@ const addBookmarks = async (urlList, parentId, index) => {
   return bmtnList;
 };
 
+/** @param {MouseEvent} ev */
+const onBookmarkClick = async (ev) => {
+  if (!ev.altKey) { // Open the bookmark in a new tab
+    ev.preventDefault();
+    const url = ev.currentTarget.href;
+    const newTabActive = !ev.ctrlKey; // Ctrl-click will open the new tab in the background
+    const removeBookmark = ev.shiftKey; // Shift-click will also remove the bookmark
+    const bookmarkId = ev.currentTarget.closest('.bmti').dataset.bookmarkId;
+
+    // Get the id of the active HMT tab before opening the bookmark
+    const tabs = await browser.tabs.query({ active: true, currentWindow: true });
+    const hmtTabId = tabs[0].id;
+
+    // Open the bookmark in a new tab
+    await browser.tabs.create({ url, active: newTabActive });
+
+    if (removeBookmark) browser.bookmarks.remove(bookmarkId);
+
+    // Discards current HMT tab if it is no longer active
+    if (newTabActive) browser.tabs.discard(hmtTabId);
+  }
+}
+
 const createBookmarkTree = (node, folderOnly = false) => {
   const ul = document.createElement('ul');
   ul.classList.add('bookmark-folder-content');
@@ -310,7 +333,7 @@ const createBookmarkTree = (node, folderOnly = false) => {
         const bmtnBody = document.createElement('a');
         bmtnBody.classList.add('bmtn__body');
         bmtnBody.href = child.url;
-        bmtnBody.target = '_blank';
+        bmtnBody.addEventListener('click', onBookmarkClick);
         bmtn.appendChild(bmtnBody);
 
         const icon = document.createElement('div');
