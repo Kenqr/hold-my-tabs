@@ -260,12 +260,12 @@ const onBookmarkClick = async (ev) => {
     const removeBookmark = ev.shiftKey; // Shift-click will also remove the bookmark
     const bookmarkId = ev.currentTarget.closest('.bmti').dataset.bookmarkId;
 
-    // Get the id of the active HMT tab before opening the bookmark
+    // Get the id of this HMT tab
     const tabs = await browser.tabs.query({ active: true, currentWindow: true });
     const hmtTabId = tabs[0].id;
 
-    // Open the bookmark in a new tab
-    await browser.tabs.create({ url, active: newTabActive });
+    // Open the bookmark in a new child tab
+    await browser.tabs.create({ url, active: newTabActive, openerTabId: hmtTabId });
 
     if (removeBookmark) browser.bookmarks.remove(bookmarkId);
 
