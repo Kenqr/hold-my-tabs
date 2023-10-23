@@ -62,7 +62,8 @@ const onDragStart = (ev) => {
 /** @param {DragEvent} ev */
 const onDragOver = (ev) => {
   ev.preventDefault();
-  ev.dataTransfer.dropEffect = 'move';
+  if (ev.ctrlKey) ev.dataTransfer.dropEffect = 'copy';
+  else ev.dataTransfer.dropEffect = 'move';
 };
 /** @param {DragEvent} ev */
 const onDrop = async (ev) => {
