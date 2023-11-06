@@ -1,4 +1,5 @@
 import { $ } from './helper.js';
+import Toastify from './lib/toastify-es-1.12.0.js';
 
 const init = async () => {
   renderFolderTree();
@@ -412,11 +413,31 @@ const deleteBookmarkButtonEventHandler = async (event) => {
 
   // Delete DOM element and bookmark
   bmti.remove();
-  if (nodeType === 'folder') {
-    browser.bookmarks.removeTree(bookmarkId);
-  } else {
-    browser.bookmarks.remove(bookmarkId);
-  }
+  let cancelled = false;
+  // Move the bookmark to a temporary position
+  browser.bookmarks.move(bookmarkId, { parentId: 'unfiled_____' });
+  const toast = Toastify({
+    text: 'Bookmark deleted. Click here to undo.',
+    duration: 5000,
+    gravity: 'bottom',
+    position: 'right',
+    stopOnFocus: true,
+    onClick: function() {
+      // Restore the bookmark
+      cancelled = true;
+      browser.bookmarks.move(bookmarkId, { parentId: node.parentId, index: node.index });
+      toast.hideToast();
+    },
+    callback: function() {
+      if (cancelled) return;
+      // Actually delete the bookmark
+      if (nodeType === 'folder') {
+        browser.bookmarks.removeTree(bookmarkId);
+      } else {
+        browser.bookmarks.remove(bookmarkId);
+      }
+    },
+  }).showToast();
 };
 
 const openAndDeleteBookmarkButtonEventHandler = async (event) => {
