@@ -417,7 +417,7 @@ const deleteBookmarkButtonEventHandler = async (event) => {
   // Move the bookmark to a temporary position
   browser.bookmarks.move(bookmarkId, { parentId: 'unfiled_____' });
   const toast = Toastify({
-    text: 'Bookmark deleted. Click here to undo.',
+    text: `The ${nodeType}:\n${node.title}\nis deleted. Click here to undo.`,
     duration: 5000,
     gravity: 'bottom',
     position: 'right',
