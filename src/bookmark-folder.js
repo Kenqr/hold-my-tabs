@@ -409,7 +409,7 @@ const deleteBookmarkButtonEventHandler = async (event) => {
 
   // Confirm deletion for folders
   const msg = `Do you want to delete this folder?\n📁${node.title}`;
-  if (nodeType === 'folder' && !confirm(msg)) return;
+  if (node.children?.length && !confirm(msg)) return;
 
   // Delete DOM element and bookmark
   bmti.remove();
