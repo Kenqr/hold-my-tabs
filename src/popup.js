@@ -140,7 +140,7 @@ const getBookmarks = async (bookmarkIds) => {
 
   try {
     return await browser.bookmarks.get(bookmarkIds);
-  } catch (e) {
+  } catch {
     return false;
   }
 };

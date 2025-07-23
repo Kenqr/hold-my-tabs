@@ -83,7 +83,7 @@ const copyTabToFolder = async (tab, folder) => {
       title: tab.title,
       url: tab.url,
     });
-  } catch (e) {
+  } catch {
     throw `Cannot add tab to folder: "${folder.title}"`;
   }
 };
@@ -123,7 +123,7 @@ const menuCopyTabsToFolder = async (tab, hmtTab) => {
     try {
       await copyTabToFolder(tab, folder);
       tabsCopied.push(tab);
-    } catch (e) {
+    } catch {
       // Do nothing
     }
   }
@@ -237,7 +237,7 @@ browser.menus.onClicked.addListener(async (info, tab) => {
         break;
       }
     }
-  } catch (e) {
+  } catch {
     // Do nothing
   }
 });
@@ -249,7 +249,7 @@ browser.pageAction.onClicked.addListener(async (tab) => {
   
     await copyTabToHmtTab(tab, hmtTab);
     await browser.tabs.remove(tab.id); // Close the tab
-  } catch (e) {
+  } catch {
     // Open extension page previous to current tab
     await openHmtPage({index: tab.index});
   }
