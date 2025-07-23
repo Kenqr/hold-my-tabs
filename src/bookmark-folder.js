@@ -1,4 +1,5 @@
 import { $ } from './helper.js';
+import Toastify from './lib/toastify-es-1.12.0.js';
 
 const init = async () => {
   renderFolderTree();
@@ -62,7 +63,8 @@ const onDragStart = (ev) => {
 /** @param {DragEvent} ev */
 const onDragOver = (ev) => {
   ev.preventDefault();
-  ev.dataTransfer.dropEffect = 'move';
+  if (ev.ctrlKey) ev.dataTransfer.dropEffect = 'copy';
+  else ev.dataTransfer.dropEffect = 'move';
 };
 /** @param {DragEvent} ev */
 const onDrop = async (ev) => {
@@ -405,21 +407,37 @@ const deleteBookmarkButtonEventHandler = async (event) => {
   const node = await getNode(bookmarkId);
   const nodeType = getBmtnType(node);
 
-  // Confirm deletion
-  const msg = `
-    Do you want to delete this ${nodeType}?
-    This action cannot be undone.
-  `;
-  const confirmed = (nodeType === 'separator') ? true : confirm(msg);
-  if (!confirmed) return;
+  // Confirm deletion for folders
+  const msg = `Do you want to delete this folder?\n📁${node.title}`;
+  if (node.children?.length && !confirm(msg)) return;
 
   // Delete DOM element and bookmark
   bmti.remove();
-  if (nodeType === 'folder') {
-    browser.bookmarks.removeTree(bookmarkId);
-  } else {
-    browser.bookmarks.remove(bookmarkId);
-  }
+  let cancelled = false;
+  // Move the bookmark to a temporary position
+  browser.bookmarks.move(bookmarkId, { parentId: 'unfiled_____' });
+  const toast = Toastify({
+    text: `The ${nodeType}:\n${node.title}\nis deleted. Click here to undo.`,
+    duration: 5000,
+    gravity: 'bottom',
+    position: 'right',
+    stopOnFocus: true,
+    onClick: function() {
+      // Restore the bookmark
+      cancelled = true;
+      browser.bookmarks.move(bookmarkId, { parentId: node.parentId, index: node.index });
+      toast.hideToast();
+    },
+    callback: function() {
+      if (cancelled) return;
+      // Actually delete the bookmark
+      if (nodeType === 'folder') {
+        browser.bookmarks.removeTree(bookmarkId);
+      } else {
+        browser.bookmarks.remove(bookmarkId);
+      }
+    },
+  }).showToast();
 };
 
 const openAndDeleteBookmarkButtonEventHandler = async (event) => {
