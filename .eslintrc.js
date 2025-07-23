@@ -12,6 +12,7 @@ module.exports = {
     ecmaVersion: 2022,
     sourceType: 'module',
   },
+  ignorePatterns: ['src/lib/**/*.js'],
   rules: {
     'no-var': 'error',
     'no-console': ['warn', { allow: ['warn', 'error'] }],
