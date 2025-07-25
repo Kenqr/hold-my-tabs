@@ -21,8 +21,7 @@ html, body {
 }
 
 .main__partition {
-    margin: 5px;
-    padding: 5px;
+    padding: 10px;
     flex: 1 0 0;
     overflow-y: auto;
     background: white;
