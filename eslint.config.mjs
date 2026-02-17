@@ -10,8 +10,7 @@ export default defineConfig([
     extends: ['js/recommended'],
     languageOptions: {
       parserOptions: {
-        ecmaVersion: 2022,
-        sourceType: 'module',
+        ecmaVersion: 2025,
       },
       globals: {
         ...globals.browser,
