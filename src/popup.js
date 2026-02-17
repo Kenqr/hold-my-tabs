@@ -7,34 +7,75 @@ const init = async () => {
   browser.runtime.sendMessage({ type: 'createMenus' });
 };
 
+/**
+ * Add bookmarkTreeNode to the popup
+ * @param {browser.bookmarks.BookmarkTreeNode} bookmark - The bookmark tree node to be added
+ * @param {boolean} removalble - Can the bookmark be removed
+ */
+const collectionAppend = (bookmark, removable = true) => {
+  const children = [];
+  if (removable) {
+    children.push(['a', {
+      class: 'bookmark__remove',
+      style: 'cursor: pointer;',
+    }, '❌']);
+  }
+  children.push(['a', {
+      // If there is no url property, it is a folder
+      href: bookmark.url ?? browser.runtime.getURL(`bookmark-folder.html#${bookmark.id}`),
+      target: '_blank',
+      class: `bookmark__title ${bookmark.url ? 'bookmark__title--url' : 'bookmark__title--folder'}`,
+    }, bookmark.title
+  ]);
+
+  $('#collection').append($create([
+    'div', {
+      class: 'bookmark',
+      'data-bookmark-id': bookmark.id,
+    },
+    ...children,
+  ]));
+};
+
+/**
+ * Enable drag and drop for collection items
+ */
+const enableDragAndDrop = () => {
+  const onDragStart = (ev) => {
+    const bm = ev.target.closest('div.bookmark');
+    ev.dataTransfer.setData('application/holdmytabs-bookmarkid', bm.dataset.bookmarkId);
+  };
+  const onDragOver = (ev) => {
+    ev.preventDefault();
+    ev.dataTransfer.dropEffect = 'move';
+  };
+  const onDrop = async (ev) => {
+    ev.preventDefault();
+    const from = ev.dataTransfer.getData('application/holdmytabs-bookmarkid');
+    const to = ev.target.closest('div.bookmark').dataset.bookmarkId;
+
+    // Reorder collection items
+    const {collection = []} = await browser.storage.local.get('collection');
+    const fromIndex = collection.indexOf(from);
+    const toIndex = collection.indexOf(to);
+    collection.splice(fromIndex, 1);
+    collection.splice(toIndex, 0, from);
+    await browser.storage.local.set({ collection });
+    refreshCollectionView();
+  };
+
+  $$('.bookmark__title').forEach(bmTitle => {
+    bmTitle.setAttribute('draggable', 'true');
+    bmTitle.addEventListener('dragstart', onDragStart);
+    bmTitle.addEventListener('dragover', onDragOver);
+    bmTitle.addEventListener('drop', onDrop);
+  })
+};
+
 const refreshCollectionView = async () => {
   $('#collection').textContent = '';
 
-  // Create elements for the popup
-  const collectionAppend = (bookmark, removable = true) => {
-    const children = [];
-    if (removable) {
-      children.push(['a', {
-        class: 'bookmark__remove',
-        style: 'cursor: pointer;',
-      }, '❌']);
-    }
-    children.push(['a', {
-        // If there is no url property, it is a folder
-        href: bookmark.url ?? browser.runtime.getURL(`bookmark-folder.html#${bookmark.id}`),
-        target: '_blank',
-        class: `bookmark__title ${bookmark.url ? 'bookmark__title--url' : 'bookmark__title--folder'}`,
-      }, bookmark.title
-    ]);
-
-    $('#collection').append($create([
-      'div', {
-        class: 'bookmark',
-        'data-bookmark-id': bookmark.id,
-      },
-      ...children,
-    ]));
-  };
+  // Add items in the collection to the popup
   const collection = await getCollection();
   const unfiled = (await getBookmarks(['unfiled_____']))[0]; // Other Bookmarks
   collection.forEach(bookmark => collectionAppend(bookmark));
@@ -64,38 +105,7 @@ const refreshCollectionView = async () => {
     elem.addEventListener('click', removeBookmarkHandler);
   });
 
-  // Allow drag and drop
-  (() => {
-    const onDragStart = (ev) => {
-      const bm = ev.target.closest('div.bookmark');
-      ev.dataTransfer.setData('application/holdmytabs-bookmarkid', bm.dataset.bookmarkId);
-    };
-    const onDragOver = (ev) => {
-      ev.preventDefault();
-      ev.dataTransfer.dropEffect = 'move';
-    };
-    const onDrop = async (ev) => {
-      ev.preventDefault();
-      const from = ev.dataTransfer.getData('application/holdmytabs-bookmarkid');
-      const to = ev.target.closest('div.bookmark').dataset.bookmarkId;
-
-      // Remove the bookmark from the collection
-      const {collection = []} = await browser.storage.local.get('collection');
-      const fromIndex = collection.indexOf(from);
-      const toIndex = collection.indexOf(to);
-      collection.splice(fromIndex, 1);
-      collection.splice(toIndex, 0, from);
-      await browser.storage.local.set({ collection });
-      refreshCollectionView();
-    };
-
-    $$('.bookmark__title').forEach(bmTitle => {
-      bmTitle.setAttribute('draggable', 'true');
-      bmTitle.addEventListener('dragstart', onDragStart);
-      bmTitle.addEventListener('dragover', onDragOver);
-      bmTitle.addEventListener('drop', onDrop);
-    })
-  })();
+  enableDragAndDrop();
 
   // Close the popup after clicking any bookmark
   const closePopupHandler = () => {
@@ -140,7 +150,7 @@ const getBookmarks = async (bookmarkIds) => {
 
   try {
     return await browser.bookmarks.get(bookmarkIds);
-  } catch (e) {
+  } catch {
     return false;
   }
 };

@@ -175,7 +175,7 @@ const extractUrlFromTextUriList = (dt) => {
     .map(str => {
       try {
         return new URL(str);
-      } catch (e) {
+      } catch {
         return null;
       }
     })
@@ -210,7 +210,7 @@ const extractUrlFromTextPlain = (dt) => {
     .map(str => {
       try {
         return new URL(str);
-      } catch (e) {
+      } catch {
         return null;
       }
     })
