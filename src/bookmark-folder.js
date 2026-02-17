@@ -279,7 +279,7 @@ const onBookmarkClick = async (ev) => {
 const createBookmarkTree = (node, folderOnly = false) => {
   const ul = document.createElement('ul');
   ul.classList.add('bookmark-folder-content');
-  for (let child of node.children) {
+  for (const child of node.children) {
     // Skip non-folders if folderOnly==true
     if (folderOnly && getBmtnType(child) !== 'folder') continue;
 
