@@ -17,6 +17,15 @@ const init = async () => {
     $('#folderTreeDiv').classList.remove('hidden');
   }
 
+  // Rename folder when the folder title is clicked
+  $('#folderTitle').addEventListener('click', () => {
+    const newTitle = prompt('Rename folder:', $('#folderTitle').textContent);
+    if (newTitle) {
+      const folderId = getCurrentFolderId();
+      browser.bookmarks.update(folderId, { title: newTitle });
+    }
+  });
+
   // Auto update bookmark tree
   browser.bookmarks.onCreated.addListener(onBookmarkCreated);
   browser.bookmarks.onRemoved.addListener(onBookmarkRemoved);
