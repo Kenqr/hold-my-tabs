@@ -10,8 +10,7 @@ export default defineConfig([
     extends: ['js/recommended'],
     languageOptions: {
       parserOptions: {
-        ecmaVersion: 2022,
-        sourceType: 'module',
+        ecmaVersion: 2025,
       },
       globals: {
         ...globals.browser,
@@ -23,6 +22,7 @@ export default defineConfig([
       'no-console': ['warn', { allow: ['warn', 'error'] }],
       'no-unused-vars': 'warn',
       'no-warning-comments': ['warn', { terms: ['todo', 'fixme', 'xxx', 'test'] }],
+      'prefer-const': 'warn',
     },
   },
 ]);
