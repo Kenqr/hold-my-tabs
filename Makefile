@@ -1,4 +1,7 @@
-.PHONY: run lint
+.PHONY: build run lint
+
+build:
+	web-ext build --source-dir=src --artifacts-dir=dist
 
 run:
 	web-ext run --source-dir=src
